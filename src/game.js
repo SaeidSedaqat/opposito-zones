@@ -516,6 +516,8 @@
     if (k === 'undo') return doUndo();
     if (mode === 'daily') { OP.ui.msg('No boosters in the Daily', { ms: 1400 }); return; }
     if (k === 'hint') return doHint();
+    // None left: the tapped booster's ad popup opens straight away (no arming first).
+    if ((k === 'check' || (k === 'reveal' && pz.n >= 6)) && OP.save.d.boosters[k] <= 0) { armed = null; updateBoosterUI(); OP.ui.boosterAd(k, false, updateBoosterUI); return; }
     if (k === 'check') { armed = armed === 'check' ? null : 'check'; updateBoosterUI(); OP.audio.play('click'); return; }
     if (k === 'reveal') { if (pz.n < 6) return; armed = armed === 'reveal' ? null : 'reveal'; updateBoosterUI(); OP.audio.play('click'); return; }
   }

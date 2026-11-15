@@ -533,27 +533,20 @@
     return true;
   }
 
-  // Booster refill: one rewarded ad grants 3 hints, 2 checks or 1 reveal.
+  // Booster refill: only the booster that ran out. One rewarded ad grants 3 hints, 2 checks or 1 reveal.
+  // The icon is the one from the game's booster bar, twice its size. Close with the red X.
   function boosterAd(pre, allowReveal, done) {
-    const G = C.adGives;
-    const opts = [['hint', G.hint, 'hints'], ['check', G.check, 'checks']];
-    if (allowReveal) opts.push(['reveal', G.reveal, 'reveal']);
-    let pick = pre;
-    const m = modal('<div class="panel"><h2>Out of ' + (pre === 'reveal' ? 'reveals' : pre + 's') + '</h2><p class="sub">Watch a short ad and choose a reward.</p><div class="choices">' +
-      opts.map((o) => '<button class="choice' + (o[0] === pick ? ' on' : '') + '" data-k="' + o[0] + '">' + ic(o[0]) + '<b>+' + o[1] + '</b><span>' + o[2] + '</span></button>').join('') +
-      '</div><button class="btn primary big" id="bWatch">' + ic('ad-white') + '<span>Watch ad</span></button><button class="btn flat" data-x="close">No thanks</button></div>');
-    const paint = () => {
-      m.querySelectorAll('.choice').forEach((c) => c.classList.toggle('on', c.dataset.k === pick));
-      const o = opts.find((x) => x[0] === pick);
-      m.querySelector('#bWatch span').textContent = 'Watch ad for +' + o[1] + ' ' + o[2];
-    };
-    paint();
-    m.querySelector('.choices').onclick = (e) => { const c = e.target.closest('.choice'); if (c) { pick = c.dataset.k; OP.audio.play('click'); paint(); } };
+    const G = C.adGives, name = { hint: 'hints', check: 'checks', reveal: 'reveals' }[pre] || pre + 's';
+    const amt = G[pre], label = amt === 1 ? name.replace(/s$/, '') : name;
+    const icon = pre === 'hint' ? ic('hint') : gridIc(pre);
+    const m = modal('<div class="panel boostad">' + XBTN + '<h2>Out of ' + name + '</h2>' +
+      '<div class="bgift">' + icon + '<b>+' + amt + ' ' + label + '</b></div>' +
+      '<button class="btn primary watch" id="bWatch">' + ic('ad-white') + '<span>Watch Ad</span></button></div>');
     m.querySelector('#bWatch').onclick = () => m.close(() => rewardedAd(() => {
-      S().boosters[pick] += G[pick];
+      S().boosters[pre] += amt;
       OP.save.persist();
       OP.audio.play('reward');
-      toast('+' + G[pick] + ' ' + opts.find((x) => x[0] === pick)[2]);
+      toast('+' + amt + ' ' + label);
       if (done) done();
     }));
   }
@@ -693,7 +686,7 @@
   // Every button: tap sound (press scale is CSS).
   document.addEventListener('click', (e) => {
     const b = e.target.closest('button');
-    if (b && !b.disabled && !b.closest('[data-x]') && b.dataset.x == null && !b.classList.contains('boost') && !b.classList.contains('card') && !b.classList.contains('choice')) OP.audio.play('click', 0.8);
+    if (b && !b.disabled && !b.closest('[data-x]') && b.dataset.x == null && !b.classList.contains('boost') && !b.classList.contains('card')) OP.audio.play('click', 0.8);
   }, true);
   document.addEventListener('dblclick', (e) => e.preventDefault());
 
