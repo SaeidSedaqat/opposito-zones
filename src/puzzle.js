@@ -425,7 +425,7 @@
   // Medium and harder boards must NOT have a unique solution once the zones are switched off.
   function generate(opts) {
     const n = opts.n, target = opts.diff, cfg = zcfg(n, target), t0 = now(), base = String(opts.seed);
-    const maxAttempts = opts.attempts || [0, 40, 40, 60, 160][target];
+    const maxAttempts = opts.attempts || [0, 40, 80, 60, 400][target];
     const rej = newRej(), natural = [0, 0, 0, 0, 0];
     let best = null;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {

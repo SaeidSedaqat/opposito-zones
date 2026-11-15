@@ -27,14 +27,25 @@
     worker.onmessage = (e) => { const d = e.data || {}; const cb = genCbs[d.id]; delete genCbs[d.id]; if (cb) cb(d.error ? null : d.puzzle); };
     worker.onerror = () => { workerOk = false; };
   }
+  // Worker timeout: if no board arrives in GEN_TIMEOUT ms (or the worker fails), make one on the main
+  // thread with a small attempt cap so the player is never stuck. The late worker answer is dropped.
+  const GEN_TIMEOUT = 6000;
+  function genLocal(spec, cb, quickCap) {
+    setTimeout(() => {
+      let p = null;
+      try { p = OP.Puzzle.generate(quickCap ? Object.assign({}, spec, { attempts: 25 }) : spec); if (p && quickCap) p.dev.fallback = true; } catch (e2) { p = null; }
+      cb(p);
+    }, 0);
+  }
   function genPuzzle(spec, cb) {
-    if (workerOk) {
-      const id = ++genSeq; genCbs[id] = cb;
-      try { worker.postMessage({ id, opts: spec }); }
-      catch (e) { workerOk = false; delete genCbs[id]; genPuzzle(spec, cb); }
-    } else {
-      setTimeout(() => { let p = null; try { p = OP.Puzzle.generate(spec); } catch (e2) { p = null; } cb(p); }, 0);
-    }
+    if (!workerOk) { genLocal(spec, cb, false); return; }
+    const id = ++genSeq;
+    let done = false;
+    const finish = (p) => { if (done) return; done = true; clearTimeout(timer); delete genCbs[id]; if (p) cb(p); else genLocal(spec, cb, true); };
+    const timer = setTimeout(() => finish(null), GEN_TIMEOUT);
+    genCbs[id] = finish;
+    try { worker.postMessage({ id, opts: spec }); }
+    catch (e) { workerOk = false; finish(null); }
   }
   const cache = {};
   function prefetch(spec) { if (spec.fixed || cache[spec.seed]) return; genPuzzle(spec, (p) => { if (p) cache[spec.seed] = p; }); }
@@ -186,7 +197,7 @@
   // the main loading screen has just been shown.)
   function start(which, opts) {
     mode = which;
-    const spec = buildSpec(which);
+    const spec = opts && opts.spec ? Object.assign({}, opts.spec) : buildSpec(which);
     const quick = opts && opts.quick, t0 = Date.now();
     const saved = curObj()[which];
     const resume = !!(saved && saved.spec && saved.spec.seed === spec.seed);

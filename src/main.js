@@ -39,7 +39,14 @@
   // Until level 1 (the tutorial) is beaten, every load goes straight into it; Home (and the daily
   // reward popup that opens there) only appears from level 2 on.
   const d = OP.save.d;
-  if (d.level === 1) OP.game.start('levels', { quick: true });
+  // Review links (dev only): ?dev=1&level=30 opens that level's board, ?dev=1&n=6&diff=3&seed=abc any
+  // seeded board. Both play as Free Play, so level progress is untouched.
+  const q = new URLSearchParams(location.search);
+  if (q.get('dev') === '1' && (q.get('level') || q.get('seed'))) {
+    const L = parseInt(q.get('level'), 10);
+    const spec = L > 0 ? OP.config.levelSpec(L) : { n: q.get('n') === '4' ? 4 : 6, diff: Math.min(4, Math.max(1, parseInt(q.get('diff'), 10) || 2)), seed: q.get('seed') };
+    OP.game.start('free', { spec, quick: true });
+  } else if (d.level === 1) OP.game.start('levels', { quick: true });
   else OP.ui.show('home'); // this alone triggers OP.game.onScreen('home'), which shows the login reward if due
 
   // ---------- dev mode: ?dev=1 ----------
@@ -76,7 +83,7 @@
       if (x) {
         const u = x.used || {}, zu = ['zone2', 'zonefull', 'meet', 'whatifZone'].filter((k) => u[k]).map((k) => k + ' ' + u[k]);
         const rj = Object.keys(x.rej || {}).filter((k) => x.rej[k]).map((k) => k + ' ' + x.rej[k]);
-        t += '\nrated: ' + D[d.rating - 1] + '  (' + x.ms + ' ms)' +
+        t += '\nrated: ' + D[d.rating - 1] + '  (' + x.ms + ' ms' + (x.fallback ? ', main-thread fallback' : '') + ')' +
           '\nzones: ' + x.zones + '  sizes ' + x.sizes.join(' ') + '  givens ' + x.givens +
           '\nwithout zones: ' + (x.noZone > 1 ? '2+ solutions (zones needed)' : x.noZone + ' solution (zones NOT needed)') +
           '\nzone steps: ' + (zu.join(', ') || 'none') +
