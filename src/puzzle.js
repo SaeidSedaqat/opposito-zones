@@ -311,6 +311,13 @@
       3: { zones: [8, 10], w: [[2, 3], [4, 5], [6, 2]], two: [1, 5] },
       4: { zones: [9, 10], w: [[2, 4], [4, 5], [6, 1]], two: [2, 6] },
     },
+    // 8x8 (Free Play on big screens only): same zone sizes, about 1.7x as many zones.
+    8: {
+      1: { zones: [11, 13], w: [[2, 1], [4, 3], [6, 8]], two: [0, 3] },
+      2: { zones: [12, 15], w: [[2, 2], [4, 5], [6, 3]], two: [2, 6] },
+      3: { zones: [14, 17], w: [[2, 3], [4, 5], [6, 2]], two: [2, 8] },
+      4: { zones: [15, 18], w: [[2, 4], [4, 5], [6, 1]], two: [3, 10] },
+    },
   };
   function zcfg(n, d) { const t = ZCFG[n] || ZCFG[6]; return t[d] || t[Math.max.apply(null, Object.keys(t).map(Number))]; }
   function pickW(w, rnd) {

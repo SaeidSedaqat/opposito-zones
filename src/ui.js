@@ -167,10 +167,14 @@
       '<button class="btn flat" data-x="close">Cancel</button></div>');
     const render = () => {
       const f = S().free;
-      // Hardest difficulty each size can produce: 4x4 Medium, 6x6 Expert.
-      const top = { 4: 2, 6: 4 }[f.n] || 4;
+      // 8x8 is listed only when its tiles would be at least 54 px in this window (see OP.game.sizeFits).
+      const sizes = C.SIZES.filter((n) => OP.game.sizeFits(n));
+      if (sizes.indexOf(f.n) < 0) f.n = 6;
+      // Hardest difficulty each size can produce: 4x4 Medium, 6x6 and 8x8 Expert.
+      const top = { 4: 2, 6: 4, 8: 4 }[f.n] || 4;
       if (f.diff > top) f.diff = top;
-      m.querySelector('#fSize').innerHTML = C.SIZES.map((n) => '<button class="pill' + (f.n === n ? ' on' : '') + '" data-n="' + n + '">' + n + '×' + n + '</button>').join('');
+      m.querySelector('#fSize').style.gridTemplateColumns = 'repeat(' + sizes.length + ',1fr)';
+      m.querySelector('#fSize').innerHTML = sizes.map((n) => '<button class="pill' + (f.n === n ? ' on' : '') + '" data-n="' + n + '">' + n + '×' + n + '</button>').join('');
       m.querySelector('#fDiff').innerHTML = C.DIFFS.map((d, k) => '<button class="pill' + (f.diff === k + 1 ? ' on' : '') + '" data-d="' + (k + 1) + '"' + (k + 1 > top ? ' disabled' : '') + '>' + d + '</button>').join('');
       m.querySelector('#fReward').textContent = C.freeReward(f.n, f.diff);
     };

@@ -29,8 +29,8 @@
     { i: 12, v: I, zone: 2, say: 'This zone has its 2 {A} too.<br>Double tap to get {B}.' },
   ];
 
-  // Boards are 4x4 and 6x6 only: on a 390 px wide phone an 8x8 board would have 42 px tiles,
-  // below the 54 px minimum. Level 1 is the guided row/column tutorial, level 2 the guided zone
+  // Levels and Daily use 4x4 and 6x6 only: on a 390 px wide phone an 8x8 board would have 42 px tiles,
+  // below the 54 px minimum (8x8 is Free Play on big screens). Level 1 is the guided row/column tutorial, level 2 the guided zone
   // tutorial, 3-5 easy 4x4 zone boards and 6 the first 6x6. From level 2 on every board has zones.
   function levelSpec(L) {
     let s;
@@ -69,12 +69,12 @@
   function dateLabel(t) { return MONTHS[t.m] + ' ' + t.day + ', ' + t.y; }
 
   OP.config = {
-    VERSION: '0.2.1',
+    VERSION: '0.2.11',
     DIFFS,
-    SIZES: [4, 6],
+    SIZES: [4, 6, 8],
     coins: [0, 10, 20, 30, 50],      // by diff (1..4)
     // Free Play pays about half of Levels (it never runs out), more for bigger and harder boards.
-    freeCoins: { 4: [2, 4], 6: [5, 10, 15, 20] },
+    freeCoins: { 4: [2, 4], 6: [5, 10, 15, 20], 8: [8, 15, 20, 30] },
     tutorialCoins: 10,
     drop: [0, 0, 0, 0.25, 0.4],      // bonus booster chance by diff (Levels only)
     adGives: { hint: 3, check: 2, reveal: 1 },

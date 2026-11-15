@@ -44,7 +44,7 @@
   const q = new URLSearchParams(location.search);
   if (q.get('dev') === '1' && (q.get('level') || q.get('seed'))) {
     const L = parseInt(q.get('level'), 10);
-    const spec = L > 0 ? OP.config.levelSpec(L) : { n: q.get('n') === '4' ? 4 : 6, diff: Math.min(4, Math.max(1, parseInt(q.get('diff'), 10) || 2)), seed: q.get('seed') };
+    const spec = L > 0 ? OP.config.levelSpec(L) : { n: [4, 6, 8].indexOf(+q.get('n')) >= 0 ? +q.get('n') : 6, diff: Math.min(4, Math.max(1, parseInt(q.get('diff'), 10) || 2)), seed: q.get('seed') };
     OP.game.start('free', { spec, quick: true });
   } else if (d.level === 1) OP.game.start('levels', { quick: true });
   else OP.ui.show('home'); // this alone triggers OP.game.onScreen('home'), which shows the login reward if due

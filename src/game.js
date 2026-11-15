@@ -87,6 +87,14 @@
   function hudScale(w, h) {
     return h > w ? Math.max(1, Math.min(w / 600, h / 1000)) : Math.max(1, Math.min(w / 1280, h / 800));
   }
+  // Tile width in CSS px an n x n board would get in this window. A size is offered only when its
+  // tiles are at least MIN_TILE wide (8x8 needs a tablet, a desktop or a wide landscape window).
+  const MIN_TILE = 54;
+  function tilePx(n) {
+    const w = window.innerWidth, h = window.innerHeight, g = hudScale(w, h);
+    return computeLayout(w / g, h / g).size * g * 0.94 / n;
+  }
+  function sizeFits(n) { return n <= 6 || tilePx(n) >= MIN_TILE; }
   function layout(w, h) {
     const g = hudScale(w, h);
     document.documentElement.style.setProperty('--g', g.toFixed(4));
@@ -855,5 +863,5 @@
     }
   }
 
-  OP.game = { start, pause, booster, hoverLine, revealLine, onScreen, refreshMarks, clearCache, adPause, layout, dprFor, Scene: BoardScene, devSolve, devInfo };
+  OP.game = { start, sizeFits, tilePx, pause, booster, hoverLine, revealLine, onScreen, refreshMarks, clearCache, adPause, layout, dprFor, Scene: BoardScene, devSolve, devInfo };
 })();
