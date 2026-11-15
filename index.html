@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Opposito Zones</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/art/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/art/icon-192.png">
+<link rel="apple-touch-icon" href="assets/art/icon-192.png">
+<script>
+// One scale for every menu (loading, Home, Shop, popups): each is designed at a fixed size and
+// zoomed by --s so it always fits and grows/shrinks as one piece, live while the window resizes.
+// Wide screens (html.land) get a bigger logo and a landscape reference size.
+(function () {
+  var r = document.documentElement;
+  function fit() {
+    var W = window.innerWidth || 1, H = window.innerHeight || 1, land = W >= H * 1.2;
+    var s = land ? Math.min(W / 560, H / 660) : Math.min(W / 360, H / 620);
+    s = Math.max(0.45, Math.min(3, s)); // grows on big monitors too, so a 3200x1920 window isn't a tiny menu in the middle
+    r.style.setProperty('--s', s.toFixed(4));
+    r.classList.toggle('land', land);
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  window.addEventListener('orientationchange', fit);
+  window.OP_fit = fit;
+})();
+</script>
+<style>
+@font-face{
+  font-family:'Nunito';
+  src:url('assets/fonts/nunito-latin.woff2?v=0.2.0') format('woff2-variations'),
+      url('assets/fonts/nunito-latin.woff2?v=0.2.0') format('woff2');
+  font-weight:200 1000; font-style:normal; font-display:swap;
+}
+:root{
+  --bg:#F6F7FB; --panel:#FFFFFF; --ink:#232A3B; --sub:#6B7280; --line:#E6E9F0;
+  --fire:#FF6A45; --ice:#3FA4E8; --good:#2FAE66; --bad:#FF5050; --gold:#F0A92E;
+  --shadow:0 10px 24px rgba(35,42,59,.10);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;}
+body{
+  background-color:var(--bg); color:var(--ink);
+  background-image:url(assets/art/bg.webp?v=0.2.0);
+  background-size:cover; background-position:center;
+  font-family:'Nunito',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  overscroll-behavior:none; touch-action:none; user-select:none;
+  -webkit-tap-highlight-color:transparent; -webkit-user-select:none;
+}
+[hidden]{display:none!important;}
+button{font-family:inherit; border:none; background:none; color:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+button:disabled{cursor:default; opacity:.5;}
+img{display:block; max-width:100%;}
+
+/* ---------- loading ---------- */
+#loading{position:fixed; inset:0; z-index:50; background:#000;
+  display:flex; align-items:center; justify-content:center; transition:opacity .45s ease;}
+/* Black until the logo AND the background art have loaded, then both fade in together (.lit, 0.5 s, default ease). */
+#loading::before{content:""; position:absolute; inset:0; background:var(--bg) url(assets/art/bg.webp?v=0.2.0) center/cover; opacity:0; transition:opacity .5s ease;}
+#loading .logoart, #loading .ztag{opacity:0; transition:opacity .5s ease;}
+#loading.lit::before, #loading.lit .logoart, #loading.lit .ztag{opacity:1;}
+#loading.done{opacity:0; pointer-events:none;}
+.lwrap{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:94%; text-align:center;}
+.lmenu{position:relative;}
+.lmenu > .btn, .lfoot > .btn{visibility:hidden;}
+.ltrack{height:10px; border-radius:6px; background:#fff; box-shadow:inset 0 0 0 1px var(--line); overflow:hidden;}
+#lbar{height:100%; width:0%; background:linear-gradient(90deg,var(--fire),var(--ice)); transition:width .25s ease;}
+#lpct{margin-top:10px; font-size:13px; color:var(--sub); font-weight:700;}
+#lerr{margin-top:14px; color:var(--bad); font-size:13px; font-weight:700; line-height:1.4;}
+
+/* ---------- stage ---------- */
+#game{position:fixed; inset:0; transition:opacity .3s ease;}
+.pload{position:fixed; inset:0; z-index:5; display:flex; align-items:center; justify-content:center; pointer-events:none; opacity:0; transition:opacity .25s ease;}
+.pload.on{opacity:1;}
+.pload b{font-size:30px; font-weight:900; color:var(--ink); min-width:6.2em; text-align:left; padding-left:.9em; text-shadow:0 2px 0 rgba(255,255,255,.6);}
+#ui{position:fixed; inset:0; pointer-events:none;}
+
+/* ---------- screens ---------- */
+.screen{position:absolute; inset:0; opacity:0; pointer-events:auto; transition:opacity .2s ease;}
+.screen.on{opacity:1;}
+
+/* ---------- top bar / shared bits ---------- */
+.topbar{position:absolute; top:0; left:0; right:0; height:60px; display:flex; align-items:center; gap:10px; padding:0 14px; z-index:2;}
+.topbar.tall{height:90px; padding:0 16px;}
+.topbar.tall .circ{width:75px; height:75px; min-width:75px; border-width:22px 24px 27px;}
+.topbar.tall .circ .ico{width:42px; height:42px; margin:-12px;}
+.topbar.tall .coins{font-size:27px; gap:9px; padding:12px 21px; border-radius:30px;}
+.topbar.tall .coins .ico{width:36px; height:36px;}
+.topbar.tall .title{font-size:26px;}
+/* Portrait: back button, coin pill and pause button 20% smaller. */
+html:not(.land) .topbar.tall .circ, html:not(.land) #gPause{width:60px; height:60px; min-width:60px; border-width:18px 19px 22px;}
+html:not(.land) .topbar.tall .circ .ico, html:not(.land) #gPause .ico{width:34px; height:34px; margin:-10px;}
+html:not(.land) .topbar.tall .coins{font-size:22px; gap:7px; padding:10px 17px; border-radius:24px;}
+html:not(.land) .topbar.tall .coins .ico{width:29px; height:29px;}
+.grow{flex:1;}
+.circ{width:50px; height:50px; min-width:50px; box-sizing:border-box; border:solid transparent; border-width:15px 16px 18px; border-image:url(assets/art/ui/btn-white.webp?v=0.2.0) 45% 30% 50% 30% fill; filter:drop-shadow(0 4px 6px rgba(35,42,59,.14));
+  display:flex; align-items:center; justify-content:center; color:var(--ink); transition:transform .12s ease;}
+.circ:active{transform:scale(.9);}
+.circ .ico{width:28px; height:28px; margin:-8px;}
+.circ.ghost{border-image:none; border-color:transparent; filter:none;}
+.title{font-size:22px; font-weight:800; margin:0; flex:1; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.coins{display:flex; align-items:center; gap:6px; font-weight:800; font-size:18px; background:var(--panel); box-shadow:var(--shadow);
+  border-radius:20px; padding:8px 14px;}
+.ico{width:24px; height:24px; display:inline-flex; flex:none;}
+.ico svg,.ico img{width:100%; height:100%;}
+.ico img{object-fit:contain; pointer-events:none;}
+.ico img[src*="/play.webp"]{transform:scale(1.3);} /* the green play art has more empty margin than play-white */
+.flame{width:16px; height:16px; display:inline-block; vertical-align:-3px; margin-right:4px;}
+
+/* ---------- buttons ---------- */
+.btn{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; box-sizing:border-box; white-space:nowrap; min-height:62px; padding:0 6px;
+  border:solid transparent; border-width:16px 22px 20px; border-image:url(assets/art/ui/btn-white.webp?v=0.2.0) 45% 25% 50% 25% fill;
+  background:none; color:var(--ink); font-weight:900; font-size:19px; filter:drop-shadow(0 6px 8px rgba(35,42,59,.16)); transition:transform .12s ease;}
+.btn:active{transform:scale(.96) translateY(2px);}
+/* Corners drawn at one uniform scale of the art (top 45%, sides 25%, bottom 50% slices), so they stay round instead of squashed. */
+.btn{border-image-width:19px 18px 22px; will-change:transform; backface-visibility:hidden;}
+.btn.big{border-image-width:22px 20px 25px;}
+.pill{border-image-width:14px 13px 16px; will-change:transform; backface-visibility:hidden;}
+.circ{will-change:transform; backface-visibility:hidden;}
+.btn .ico{width:28px; height:28px;}
+.btn.primary{border-image-source:url(assets/art/ui/btn-orange.webp?v=0.2.0); color:#fff; text-shadow:0 2px 0 rgba(150,50,10,.45);}
+.btn.gold{border-image-source:url(assets/art/ui/btn-gold.webp?v=0.2.0); color:#6A4305; text-shadow:0 1px 0 rgba(255,255,255,.55);}
+.btn.warn{color:#D2402C;}
+.btn.flat{border-image:none; border-color:transparent; filter:none; color:var(--sub); min-height:44px;}
+.btn.big{flex-direction:column; gap:2px; min-height:86px; border-width:18px 24px 24px;}
+.btn.big .t{font-size:25px; line-height:1.1;}
+.btn.big .s{font-size:15px; font-weight:800; color:var(--sub); text-shadow:none;}
+.btn.primary.big .s{color:#FFF1E8; text-shadow:0 1px 0 rgba(150,50,10,.35);}
+.btn.daily{border-image-source:url(assets/art/ui/btn-navy.webp?v=0.2.0); color:#fff; text-shadow:0 2px 0 rgba(10,20,60,.5);}
+.btn.green{border-image-source:url(assets/art/ui/btn-green.webp?v=0.2.0); color:#fff; text-shadow:0 2px 0 rgba(10,70,40,.45);}
+.btn.daily .s{color:#D3DCF5; text-shadow:0 1px 0 rgba(10,20,60,.4);}
+.btn.play{flex-direction:row; position:relative;}
+.btn.play .ico{width:32px; height:32px; position:absolute; left:2px; top:50%; transform:translateY(-50%);}
+
+/* ---------- home ---------- */
+/* Menus are zoomed by --s (set in <head>). Inside a zoomed box vw/vh get zoomed too, so they are divided by --s or avoided. */
+.screen:not([data-name="game"]), #loading .homebody, .modal .panel, .wrays{zoom:var(--s,1);}
+.homebody{position:absolute; inset:0; display:flex; flex-direction:column; padding:24px 14px;}
+.homemid{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:calc(8vh / var(--s,1)); min-height:0;}
+.logo.big{display:flex; flex-direction:column; align-items:center; gap:0;}
+.ztag{margin-top:-14px; padding:4px 16px 5px; border-radius:14px; background:#D9CFF2; box-shadow:inset 0 0 0 3px #7A6AA8, 0 4px 10px rgba(35,42,59,.18); color:#4B3F78; font-size:20px; font-weight:900; letter-spacing:.32em; text-indent:.32em; line-height:1;} /* this game is the zones edition: same logo art, plus a pastel zone tag */
+html.land .ztag{font-size:26px;}
+.logo.big{max-width:100%;}
+.logo.big .logoart{width:330px; max-width:100%; height:auto; pointer-events:none;}
+.menu{width:min(306px,100%); display:flex; flex-direction:column; gap:14px;}
+.footrow{width:min(306px,100%); margin:0 auto; display:flex; justify-content:space-between; gap:30px; flex:none;}
+.footrow > .btn{flex:0 0 min(130px, calc(50% - 15px));}
+/* Wide screens (html.land): same stacked Home, bigger logo, landscape reference size. */
+html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo stays on top in every orientation */
+.btn.foot{border-image-source:url(assets/art/ui/btn-sky.webp?v=0.2.0); min-height:86px; border-width:18px 24px 24px; border-image-width:22px 20px 25px;}
+.btn.foot .ico{width:60px; height:60px; margin:-6px 0;}
+
+/* ---------- free play ---------- */
+.lbl{font-size:13px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin-top:8px;}
+.pills{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+#fDiff{grid-template-columns:repeat(2,1fr);}
+.pill{min-height:50px; padding:0; white-space:nowrap; border:solid transparent; border-width:13px 12px 16px; border-image:url(assets/art/ui/btn-white.webp?v=0.2.0) 45% 25% 50% 25% fill; filter:drop-shadow(0 4px 6px rgba(35,42,59,.14)); font-weight:900; font-size:16px; color:var(--sub); transition:transform .12s ease,color .15s;}
+.pill:active{transform:scale(.95);}
+.pill.on{border-image-source:url(assets/art/ui/btn-orange.webp?v=0.2.0); color:#fff; text-shadow:0 2px 0 rgba(150,50,10,.45);}
+.pill:disabled{opacity:.35; filter:grayscale(1); cursor:default; transform:none;}
+.toggles{display:flex; flex-direction:column; gap:10px; margin-top:6px;}
+.toggles.col{margin:10px 0;}
+.tg{display:flex; align-items:center; justify-content:space-between; background:var(--panel); box-shadow:var(--shadow); border-radius:14px; padding:12px 16px; font-weight:700; font-size:14.5px;}
+.tg input{position:absolute; opacity:0; width:0; height:0;}
+.tg b{width:42px; height:26px; border-radius:14px; background:#DADFE8; position:relative; flex:none; transition:background .15s;}
+.tg b::after{content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.2); transition:left .15s;}
+.tg input:checked + b{background:var(--fire);}
+.tg input:checked + b::after{left:19px;}
+.play{margin-top:8px;}
+
+/* ---------- shop ---------- */
+.shopbody{position:absolute; inset:90px 0 0 0; overflow:hidden; padding:10px 14px 16px; max-width:520px; margin:0 auto; display:flex; container-type:size;}
+/* Cards keep a card shape (at most 1.7x as tall as wide) instead of stretching to fill tall phones. */
+.cards{flex:1; min-height:0; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,min(calc((100cqh - 20px) / 3), calc((100cqw - 20px) / 3 * 1.7))); gap:10px; align-content:center;}
+.card{container-type:size; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; min-height:0; overflow:hidden; padding:8px 4px 9px; border-radius:16px; background:var(--panel); box-shadow:var(--shadow); transition:transform .12s ease;}
+.card:active{transform:scale(.96);}
+.mini{flex:none; width:min(100%, calc((100cqh - 82px) * 2)); aspect-ratio:2/1; border-radius:12px; display:flex; gap:6px; padding:6px; margin-bottom:2px; box-sizing:border-box;}
+.mini i{flex:1; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.55); border-radius:8px;}
+.mini i img{width:84%; height:84%; object-fit:contain;}
+.nm{font-size:12.5px; font-weight:800; text-align:center; line-height:1.2;}
+.st{display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; max-width:100%; box-sizing:border-box; font-size:min(20px,12.5cqw); font-weight:900; padding:.4em .5em; border-radius:14px; color:var(--sub); background:#EEF1F6;}
+.st .ico{width:1.15em; height:1.15em;}
+.card.equipped .st{background:#E7F7EE; color:var(--good);}
+.card.equip .st{background:#EAF5FD; color:var(--ice);}
+.card.buy .st{background:#FFF6E3; color:#B8790E;}
+.card.buy .st, .card.poor .st{font-size:min(21px,19cqw); padding:.35em .7em;}
+.card.ad .st{background:#F3EBFF; color:#7A4FD1;}
+.card.poor .st{background:#F1F2F5; color:#9AA2AE;}
+.card.locked .st{background:#F1F2F5; color:#9AA2AE; font-size:min(17px,12.5cqw); padding:.45em .5em;}
+
+/* ---------- game HUD ---------- */
+.screen[data-name="game"]{overflow:hidden; pointer-events:none; zoom:var(--g,1);} /* --g: big-screen HUD scale from game.js layout() */
+#gPause{position:absolute; z-index:3; pointer-events:auto; width:75px; height:75px; min-width:75px; border-width:22px 24px 27px;}
+#gPause .ico{width:42px; height:42px; margin:-12px;}
+.glabel{position:absolute; z-index:2; display:flex; flex-direction:column; align-items:center; gap:2px; pointer-events:none;}
+.glabel b{font-size:24px; font-weight:800; white-space:nowrap;}
+.glabel span{font-size:19px; font-weight:700; color:var(--sub); white-space:nowrap;}
+.gtimer{position:absolute; z-index:2; font-weight:800; font-size:15px; background:var(--panel); box-shadow:var(--shadow); border-radius:12px; padding:6px 12px; pointer-events:none;}
+.gmsg{position:absolute; z-index:2; display:flex; align-items:center; justify-content:center; text-align:center; height:56px; line-height:1.25;
+  font-size:16px; font-weight:800; color:#3d4660; opacity:0; transform:translateY(-4px); transition:opacity .2s ease,transform .2s ease; pointer-events:none;}
+.gmsg.show{opacity:1; transform:translateY(0);}
+.gmsg.bad{color:var(--bad);}
+.gmsg.good{color:var(--good);}
+.gmsg.tut{color:var(--ink); font-size:17px;}
+.gmsg.hint{color:var(--ink); font-size:17.6px;}
+.gmsg.tut span,.gmsg.hint span{display:inline-block; background:rgba(255,255,255,.88); border-radius:14px; padding:6px 14px; box-shadow:0 3px 10px rgba(35,42,59,.12);}
+.bar{position:absolute; z-index:2; display:flex; gap:8px; background:var(--panel); box-shadow:var(--shadow); border-radius:18px; padding:8px; pointer-events:auto;}
+.boost{position:relative; flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 4px; border-radius:13px; font-size:12.5px; font-weight:800; color:var(--ink); transition:transform .12s ease,background .15s;}
+.boost:active{transform:scale(.92);}
+.boost .ico{width:38px; height:38px;}
+.boost.armed{background:linear-gradient(135deg,var(--fire),var(--ice)); color:#fff;}
+.boost.off{opacity:.35; filter:grayscale(1);}
+.boost.off em{display:none;}
+.boost em{position:absolute; top:-4px; right:8px; font-style:normal; font-size:16px; font-weight:800; background:var(--ink); color:#fff;
+  border-radius:13px; min-width:26px; height:26px; display:flex; align-items:center; justify-content:center; padding:0 6px; line-height:1; box-shadow:0 0 0 2px #fff;} /* count badge: 26px circle, 16px text (0.2.0) */
+.boost em.plus{background:var(--good);}
+.gen{position:absolute; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  background:rgba(246,247,251,.9); border-radius:16px; pointer-events:none;}
+.gen i{width:28px; height:28px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--fire); animation:spin 0.8s linear infinite;}
+.gen span{font-size:13px; font-weight:800; color:var(--sub);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.gnums{position:absolute; inset:0; z-index:3; pointer-events:none;}
+.lnum{position:absolute; width:26px; height:26px; border-radius:13px; pointer-events:auto; background:#fff; color:var(--ink); font-size:14px; font-weight:900; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(35,42,59,.22), 0 0 0 2px #2FBFAE inset; transition:transform .12s ease,background .12s;}
+.lnum:hover{background:#2FBFAE; color:#fff; transform:scale(1.12);}
+.lnum:active{transform:scale(.9);}
+.ico.combo{position:relative;}
+.ico.combo svg{position:absolute; left:0; top:0; width:74%; height:74%;}
+.ico.combo img{position:absolute; right:-8%; bottom:-8%; width:66%; height:66%; filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));}
+.hand{position:absolute; z-index:4; width:52px; height:52px; margin:-3px 0 0 -10px; pointer-events:none; transform:translateY(0);}
+.hand img{display:block; width:100%; height:100%; filter:drop-shadow(0 0 1px rgba(44,52,69,.9)) drop-shadow(0 3px 5px rgba(0,0,0,.3));}
+.hand .ring{position:absolute; left:50%; top:12%; width:52px; height:52px; margin:-26px 0 0 -26px; border-radius:50%;
+  border:3px solid var(--ice); opacity:0; display:block;}
+.hand.again{animation:handTap .9s ease-in-out infinite;}
+.hand.again .ring{animation:ringPulse .9s ease-in-out infinite;}
+/* Double tap: two quick taps, then a 1 s rest (1.6 s cycle). */
+.hand.dbl{animation:handDbl 1.6s ease-in-out infinite;}
+.hand.dbl .ring{animation:ringDbl 1.6s ease-out infinite;}
+@keyframes handDbl{0%,18%,36%,100%{transform:translateY(0);}9%,27%{transform:translateY(8px);}}
+@keyframes ringDbl{0%,8%{opacity:0; transform:scale(.7);}10%{opacity:.6; transform:scale(.7);}18%{opacity:0; transform:scale(1.15);}26%{opacity:0; transform:scale(.7);}28%{opacity:.6; transform:scale(.7);}38%,100%{opacity:0; transform:scale(1.15);}}
+@keyframes handTap{0%,100%{transform:translateY(0);}50%{transform:translateY(8px);}}
+@keyframes ringPulse{0%{opacity:.6; transform:scale(.7);}70%{opacity:0; transform:scale(1.15);}100%{opacity:0;}}
+
+/* ---------- modals ---------- */
+.modal{position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .2s ease; padding:20px;}
+.modal.on{opacity:1; pointer-events:auto;}
+.scrim{position:absolute; inset:0; background:rgba(20,24,36,.45);}
+.panel{position:relative; width:min(380px,100%); overflow:hidden; background:#FFF7E8; border-radius:22px; padding:26px 22px 22px;
+  display:flex; flex-direction:column; gap:12px; box-shadow:0 20px 50px rgba(20,24,36,.3); transform:scale(.94); transition:transform .2s ease;}
+.modal.on .panel{transform:scale(1);}
+.xclose{position:absolute; top:12px; right:12px; z-index:1; width:40px; height:40px; padding:0; border:0; background:none; display:flex; align-items:center; justify-content:center; transition:transform .12s ease;}
+.xclose:active{transform:scale(.9);}
+.xclose img{display:block; width:100%; height:100%; filter:drop-shadow(0 2px 3px rgba(120,20,20,.3));}
+.panel.menu{width:fit-content; padding:22px 30px 22px;}
+.panel.menu h2{font-size:24px; margin-bottom:10px;}
+.panel.menu .xclose{top:10px; right:10px;}
+.panel.help h2{padding:0 34px;}
+.panel h2{margin:0 0 4px; font-size:19px; font-weight:800; text-align:center;}
+.panel p{margin:0; font-size:14px; color:var(--sub); text-align:center; line-height:1.4;}
+.panel.small{width:min(320px,100%);}
+.panel.free .lbl{margin-top:4px;}
+.panel.free .play{margin-top:4px;}
+.panel.free .play .t{font-size:38px;}
+.panel.free .play .ico{width:48px; height:48px;}
+#hLevels{margin-top:0;}
+#hLevels .t, #hFree .t, #hDaily .t{font-size:38px;}
+#hLevels .ico, #hFree .ico, #hDaily .ico{width:48px; height:48px; left:4px;}
+#hFree, #hDaily{margin-top:0;}
+/* Text starts the same distance after the play icon on all three home buttons. */
+#hLevels, #hFree, #hDaily{align-items:flex-start; padding-left:76px;}
+#hLevels, #hFree{justify-content:flex-start; align-items:center;}
+#hDaily.play{flex-direction:column;}
+.freward{display:flex; align-items:center; justify-content:center; gap:6px; margin-top:8px; font-size:17px; font-weight:800; color:var(--sub);}
+.freward .ico{width:30px; height:30px;}
+.freward b{font-size:24px; color:#B8790E;}
+.row2{display:flex; gap:10px;}
+.row2 .btn{flex:1; min-width:0; white-space:nowrap; font-size:17px; border-left-width:14px; border-right-width:14px; gap:6px;}
+.row2 .btn .ico{width:24px; height:24px;}
+.row2 .btn.flat{border-left-width:0; border-right-width:0; padding:0;}
+.sub{font-size:13.5px; color:var(--sub); text-align:center; margin:-4px 0 4px;}
+.credit{text-align:center; font-size:12.5px; font-weight:700; color:var(--sub); margin-top:6px;}
+.credit small{display:block; font-weight:700; opacity:.6; margin-top:2px;}
+.pair{display:flex; gap:16px; justify-content:center; margin:4px 0;}
+.pair span{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12.5px; font-weight:700; color:var(--sub);}
+.pair img{width:46px; height:46px;}
+.act{min-height:48px;}
+/* Pause menu + Settings: icon-only buttons, the home Settings/Shop shape at 70% (91x60). */
+.icgrid{display:grid; grid-template-columns:repeat(2,91px); gap:14px 22px; justify-content:center; margin:4px 0 6px;}
+.btn.icb{width:91px; height:60px; min-height:0; padding:0; border-width:13px 17px 17px; border-image-width:15px 14px 18px; gap:0;}
+.btn.icb.wide{grid-column:1/-1; justify-self:center;}
+.btn.icb .ico{width:40px; height:40px; margin:-6px 0;}
+.btn.icb .ico svg{transform:scale(1.15); filter:drop-shadow(0 2px 0 rgba(150,50,10,.45));} /* flat menu icons, same shadow as button text */
+.btn.icb.off .ico{opacity:.45;}
+.btn.icb.off::after{content:""; position:absolute; left:50%; top:50%; width:46px; height:5px; margin:-2.5px 0 0 -23px; border-radius:3px; background:#fff; box-shadow:0 0 0 2px rgba(150,50,10,.35); transform:rotate(-40deg); pointer-events:none;}
+.btn.tgl:not(.icb) .ico{width:26px; height:26px;}
+
+/* ---------- how to play ---------- */
+.panel.help{width:min(420px,100%); text-align:left;}
+.panel.help h2{text-align:center;}
+.help-rule{container-type:inline-size; border-top:1px solid var(--line); padding-top:12px; margin-top:4px;}
+.help-rule:first-of-type{border-top:none; padding-top:0; margin-top:0;}
+.help-rule h3{margin:0 0 4px; font-size:14.5px; font-weight:800;}
+.help-rule p{margin:0 0 8px; text-align:left; font-size:13px;}
+.ex-group{display:flex; gap:6px; flex-wrap:nowrap; --t:min(26px, calc((100cqw - 70px) / 8));} /* every example on one line: tiles shrink to fit 4 pairs */
+.ex-row{display:flex; align-items:center; gap:4px; padding:3px; border-radius:10px; border:2px solid; flex:none;} /* hugs its tiles */
+.ex-row i{width:var(--t); height:var(--t); border-radius:6px; background:#fff; display:flex; align-items:center; justify-content:center; flex:none;}
+.ex-row i img{width:72%; height:72%;}
+.ex-good{border-color:var(--good); background:#EFFBF3;}
+.ex-bad{border-color:var(--bad); background:#FFF1F0;}
+.ex-grid{display:grid; grid-template-columns:repeat(var(--n),var(--t)); gap:3px;}
+.ex-zone{padding:2px; border-radius:8px; background:#D9CFF2; box-shadow:inset 0 0 0 2.5px #7A6AA8;} /* a pastel zone with its thick border, as on the board */
+.ex-zone i{background:rgba(255,255,255,.5);}
+.ex-group:has(.ex-zone){--t:min(24px, calc((100cqw - 120px) / 8));}
+#fSize{grid-template-columns:repeat(2,1fr);}
+
+/* ---------- login track ---------- */
+.panel.login{width:min(400px,100%);}
+.panel.login h2{font-size:29.7px;}
+#lClaim{font-size:31.9px;}
+.days{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+.day{display:flex; flex-direction:column; align-items:center; gap:4px; background:#F7EBD5; border-radius:14px; padding:10px 8px; position:relative;}
+.day.wide{grid-column:1/3; flex-direction:row; justify-content:center; gap:10px;}
+.day.now{background:linear-gradient(135deg,var(--fire),var(--ice)); color:#fff;}
+.day.got{opacity:.55;}
+.dn{font-size:12.1px; font-weight:800; text-transform:uppercase; letter-spacing:.03em;}
+.di{width:30px; height:30px; display:flex; align-items:center; justify-content:center;}
+.di img{width:100%; height:100%;}
+.di.two{width:auto; gap:3px;}
+.di.two img{width:30px;}
+.di .ico{width:100%; height:100%;}
+.dt{font-size:12.65px; font-weight:700;}
+.ok{position:absolute; top:4px; right:6px; width:16px; height:16px; color:var(--good);}
+.day.now .ok{color:#fff;}
+
+/* ---------- booster ad choices ---------- */
+.choices{display:flex; gap:8px;}
+.choice{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 6px; border-radius:14px; background:#F7EBD5; transition:transform .12s ease,background .15s;}
+.choice:active{transform:scale(.95);}
+.choice.on{background:linear-gradient(135deg,var(--fire),var(--ice)); color:#fff;}
+.choice b{font-size:15px; font-weight:800;}
+.choice span{font-size:11px; font-weight:700; opacity:.85;}
+.choice .ico{width:20px; height:20px;}
+
+/* ---------- win panel ---------- */
+.panel.win{align-items:center; text-align:center;}
+.solved{background:linear-gradient(135deg,var(--fire),var(--ice)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.wrays{position:fixed; will-change:rotate,transform,opacity; left:50%; width:560px; height:560px; margin:-280px 0 0 -280px; pointer-events:none; background:radial-gradient(circle,#FFF3C4 0%,#FFC23D 45%,#FF9F3D 100%); -webkit-mask:url(assets/art/fx/rays.webp?v=0.2.0) center/contain no-repeat; mask:url(assets/art/fx/rays.webp?v=0.2.0) center/contain no-repeat; opacity:0;}
+.modal.on .wrays{opacity:.9; transform:scale(1); animation:wrin .6s cubic-bezier(.2,1.4,.4,1) both, wspin 14s linear infinite;}
+@keyframes wrin{from{opacity:0; transform:scale(.3);} to{opacity:.9; transform:scale(1);}}
+@keyframes wspin{from{rotate:0deg;} to{rotate:360deg;}}
+.panel.win{overflow:visible;}
+.panel.win h2.solved{font-size:24px;}
+.panel.win .row2{align-self:stretch;}
+.panel.win .row2 .btn{font-size:22px;}
+.panel.win > #wHome{font-size:22px;}
+.btn.dbl{width:auto; align-self:center; min-height:52px; font-size:20px; gap:6px; border-left-width:16px; border-right-width:16px;}
+.btn.dbl .ico{width:26px; height:26px;}
+.modal.on .panel.win .solved{animation:wpop .55s cubic-bezier(.2,1.6,.4,1) both .1s;}
+@keyframes wpop{0%{transform:scale(.3); opacity:0;} 100%{transform:scale(1); opacity:1;}}
+.wspark{position:absolute; width:30px; height:30px; pointer-events:none; background:#FFB020; -webkit-mask:url(assets/art/fx/spark.webp?v=0.2.0) center/contain no-repeat; mask:url(assets/art/fx/spark.webp?v=0.2.0) center/contain no-repeat; animation:wtw 1.6s ease-in-out infinite; transform:scale(0);}
+@keyframes wtw{0%,100%{transform:scale(0) rotate(0deg);} 50%{transform:scale(1) rotate(90deg);}}
+#wCoins.pop{animation:cpop .35s ease-out;}
+@keyframes cpop{50%{transform:scale(1.35);}}
+.confetti{position:fixed; will-change:transform; inset:0; width:100%; height:100%; pointer-events:none; z-index:2;}
+.reward{display:flex; align-items:center; gap:8px; font-size:26px; font-weight:800; margin:4px 0;}
+.reward .ico{width:30px; height:30px;}
+.bonus{display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700; color:var(--sub); background:#F3F5F9; border-radius:12px; padding:6px 12px;}
+.bonus .ico{width:16px; height:16px;}
+.stats{display:flex; gap:24px; margin:4px 0;}
+.stats div{display:flex; flex-direction:column; align-items:center; gap:2px;}
+.stats span{font-size:12px; font-weight:700; color:var(--sub); text-transform:uppercase; letter-spacing:.03em;}
+.stats b{font-size:20px; font-weight:800; display:flex; align-items:center;}
+.daydone{align-items:center; text-align:center;}
+.daydone .stats b{font-size:30px;}
+.daydone p{margin:6px 0 4px;}
+.daydone .btn{font-size:25px;}
+
+/* ---------- ad overlay / toast ---------- */
+.adov{position:fixed; inset:0; z-index:40; background:#11131c; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .2s ease;}
+.adov.on{opacity:1; pointer-events:auto;}
+.adbox{display:flex; flex-direction:column; align-items:center; gap:14px;}
+.adtag{font-size:11px; font-weight:800; letter-spacing:.08em; color:#8891A6; background:#242838; padding:4px 10px; border-radius:6px;}
+.adtxt{font-size:17px; font-weight:800; color:#fff;}
+.toast{position:fixed; left:50%; bottom:32px; z-index:45; transform:translate(-50%,16px); background:#232A3B; color:#fff; font-size:13.5px; font-weight:700;
+  padding:12px 20px; border-radius:14px; opacity:0; transition:opacity .2s ease,transform .2s ease; pointer-events:none; max-width:86vw; text-align:center;}
+.toast.on{opacity:1; transform:translate(-50%,0);}
+
+/* ---------- small screens ---------- */
+@media (max-width:380px){
+  .cards{gap:8px;}
+}
+</style>
+</head>
+<body>
+<div id="loading">
+  <!-- Same layout as the Home screen (invisible stand-ins for its buttons) so the logo sits exactly where Home shows it. -->
+  <div class="homebody"><div class="homemid"><div class="logo big"><img class="logoart" alt="Opposito Zones" draggable="false" src="assets/art/ui/logo.webp?v=0.2.0"><b class="ztag">ZONES</b></div>
+    <div class="menu lmenu"><div class="btn big"></div><div class="btn big"></div><div class="btn big"></div>
+      <div class="lwrap">
+        <div class="ltrack"><div id="lbar"></div></div>
+        <div id="lpct">0%</div>
+        <div id="lerr" hidden>Could not load. Check your connection and reload.</div>
+      </div></div></div>
+    <div class="footrow lfoot"><div class="btn foot"><i class="ico"></i></div><div class="btn foot"><i class="ico"></i></div></div></div>
+</div>
+<div id="game"></div>
+<div id="ui"></div>
+
+<script>
+(function(){
+  'use strict';
+  var V = '0.2.0';
+  var FILES = [
+    ['lib/phaser-4.2.1.min.js', 1375976],
+    ['src/config.js', 5111],
+    ['src/save.js', 2162],
+    ['src/skins.js', 12505],
+    ['src/audio.js', 4057],
+    ['src/puzzle.js', 27394],
+    ['src/ui.js', 45248],
+    ['src/game.js', 44397],
+    ['src/main.js', 6028]
+  ];
+  var SFX = [
+    ['click', 669], ['fire', 2341], ['clear', 1296], ['line', 4013],
+    ['wrong', 3386], ['win', 10909], ['coin', 3386], ['hint', 5058], ['undo', 1923],
+    ['open', 3177], ['close', 3177], ['reward', 3595], ['daily', 8193]
+  ];
+  // UI art: decoded during loading so icons and button skins never pop in empty later.
+  // Icons are requested with ?v= exactly like ui.js does; button skins and fx come from CSS without it.
+  var ICONS = ['gear', 'bag', 'back', 'pause', 'undo', 'hint', 'check', 'reveal', 'home', 'play', 'lock', 'ad', 'tick', 'cross', 'help', 'coin', 'play-white', 'ad-white', 'hand', 'x-red'];
+  var IMGS = ICONS.map(function (k) { return ['assets/art/ui/' + k + '.webp?v=' + V, 4000]; })
+    .concat([['assets/art/ui/btn-gold.webp?v=' + V, 12502], ['assets/art/ui/btn-navy.webp?v=' + V, 14398], ['assets/art/ui/btn-orange.webp?v=' + V, 14006],
+      ['assets/art/ui/btn-white.webp?v=' + V, 7426], ['assets/art/ui/btn-sky.webp?v=' + V, 13080], ['assets/art/ui/btn-green.webp?v=' + V, 14086], ['assets/art/ui/logo.webp?v=' + V, 28664], ['assets/art/fx/rays.webp?v=' + V, 57550], ['assets/art/fx/spark.webp?v=' + V, 2872]])
+    // Board pieces for every skin (skins.js and Phaser use these exact URLs) and the page background.
+    .concat(['alien', 'burger', 'cactus', 'cat', 'coffee', 'dog', 'fire', 'flower', 'ice', 'moon', 'ninja', 'pirate', 'pizza', 'robot', 'shield', 'sun', 'sword', 'tea']
+      .map(function (k) { return ['assets/art/pieces/' + k + '.webp?v=' + V, 8600]; }))
+    .concat([['assets/art/bg.webp?v=' + V, 4878]]);
+  window.OP_IMGS = [];
+  var totalBytes = 0;
+  FILES.forEach(function (f) { totalBytes += f[1]; });
+  SFX.forEach(function (f) { totalBytes += f[1]; });
+  IMGS.forEach(function (f) { totalBytes += f[1]; });
+  var loaded = 0;
+  var scr = document.getElementById('loading'), bar = document.getElementById('lbar'),
+      pct = document.getElementById('lpct'), err = document.getElementById('lerr');
+  // The loading screen starts black; once the logo and the background art have both arrived, they fade in together (0.5 s).
+  (function () {
+    var logo = scr && scr.querySelector('.logoart');
+    if (!logo) return;
+    var bg = new Image(), left = 2, gone = false;
+    function one() { if (--left > 0 || gone) return; gone = true; setTimeout(function () { scr.classList.add('lit'); }, 30); } // timer, not rAF (rAF sleeps in hidden tabs)
+    bg.onload = bg.onerror = one; bg.src = 'assets/art/bg.webp?v=' + V;
+    if (logo.complete && logo.naturalWidth) one(); else { logo.addEventListener('load', one); logo.addEventListener('error', one); }
+  })();
+
+  // The bar never jumps: setPct only moves the target, and the shown value runs up to it quickly.
+  var target = 0, shown = 0, onFull = null;
+  function draw() {
+    if (shown < target) shown = Math.min(target, shown + Math.max(0.8, (target - shown) * 0.08));
+    if (bar) bar.style.width = shown + '%';
+    if (pct) pct.textContent = Math.round(shown) + '%';
+    if (shown >= 100 && onFull) { var f = onFull; onFull = null; f(); return; }
+    setTimeout(draw, 16); // a timer, not rAF: rAF can sleep in background tabs and would hold the loader
+  }
+  draw();
+  function setPct(p) { target = Math.max(target, Math.max(0, Math.min(100, p))); }
+  function fail() { if (err) err.hidden = false; }
+  function bump(bytes) { loaded += bytes; setPct(92 * loaded / totalBytes); }
+  // A failed download is never final: wait a little (longer each time, up to 5 s) and fetch that
+  // file again with a cache-busting suffix. After a few misses a soft "still trying" note shows,
+  // and it hides again once loading finishes. Nothing ever reloads the page.
+  var misses = 0;
+  function backoff(n) { return Math.min(5000, 700 * n); }
+  function missed() { if (++misses >= 3 && err) { err.textContent = 'Slow connection, still trying…'; err.hidden = false; } }
+
+  function fetchText(url, cb, r) {
+    var called = false;
+    function once(e, t) { if (!called) { called = true; cb(e, t); } }
+    try {
+      var x = new XMLHttpRequest();
+      x.open('GET', url + '?v=' + V + (r ? '&r=' + r : ''), true);
+      x.onreadystatechange = function () {
+        if (x.readyState === 4) {
+          if ((x.status >= 200 && x.status < 300) || (x.status === 0 && x.responseText)) once(null, x.responseText);
+          else once(new Error('http ' + x.status));
+        }
+      };
+      x.onerror = function () { once(new Error('network')); };
+      x.send();
+    } catch (e) { once(e); }
+  }
+  function fetchBin(url, cb) {
+    try {
+      var x = new XMLHttpRequest();
+      x.open('GET', url + '?v=' + V, true);
+      x.responseType = 'arraybuffer';
+      x.onreadystatechange = function () {
+        if (x.readyState === 4) {
+          if ((x.status >= 200 && x.status < 300) || x.status === 0) cb(null, x.response);
+          else cb(new Error('http ' + x.status));
+        }
+      };
+      x.onerror = function () { cb(new Error('network')); };
+      x.send();
+    } catch (e) { cb(e); }
+  }
+
+  window.OP_BIN = {};
+
+  // Fetch every file and every sound at once (no reason to wait on one tiny request before
+  // starting the next) and only run the scripts, in order, once everything has arrived.
+  function loadAll() {
+    var texts = new Array(FILES.length);
+    var remaining = FILES.length + SFX.length + IMGS.length;
+    var failed = false;
+    function settle() {
+      remaining--;
+      if (remaining === 0 && !failed) runScripts();
+    }
+    FILES.forEach(function (f, i) {
+      var tries = 0;
+      (function get() {
+        fetchText(f[0], function (e, text) {
+          if (e) { tries++; missed(); setTimeout(get, backoff(tries)); return; }
+          texts[i] = text;
+          bump(f[1]);
+          settle();
+        }, tries);
+      })();
+    });
+    SFX.forEach(function (f) {
+      fetchBin('assets/audio/' + f[0] + '.mp3', function (e, buf) {
+        if (!e) window.OP_BIN[f[0]] = buf;
+        bump(f[1]);
+        settle();
+      });
+    });
+    IMGS.forEach(function (f) {
+      // Every image must really arrive before the game starts (no "assume it loaded" timeout):
+      // a failed request is simply fetched again (see backoff) until it arrives.
+      var img = new Image(), done = false, tries = 0;
+      function ok() { if (done) return; done = true; bump(f[1]); settle(); }
+      img.onload = function () {
+        // Decode before finishing too, so nothing pops in empty. A hidden tab can stall decode(),
+        // so there (or if it takes over 4 s) the loaded image is accepted as is.
+        if (img.decode && !document.hidden) { img.decode().then(ok, ok); setTimeout(ok, 4000); } else ok();
+      };
+      img.onerror = function () {
+        tries++; missed();
+        setTimeout(function () { img.src = f[0] + (f[0].indexOf('?') < 0 ? '?' : '&') + 'r=' + tries; }, backoff(tries));
+      };
+      img.src = f[0];
+      window.OP_IMGS.push(img); // keep a reference so the decoded image stays cached
+    });
+    function runScripts() {
+      for (var i = 0; i < FILES.length; i++) {
+        try {
+          var s = document.createElement('script');
+          s.text = texts[i] + '\n//# sourceURL=' + location.origin + '/' + FILES[i][0];
+          document.body.appendChild(s);
+          document.body.removeChild(s);
+        } catch (ex) { fail(); return; }
+      }
+      finish();
+    }
+  }
+  function finish() {
+    // The UI font has to be ready too, or the first screen flashes in a fallback font.
+    var fontsDone = false;
+    function go() {
+      if (fontsDone) return; fontsDone = true;
+      if (err && misses) err.hidden = true;
+      onFull = function () {
+        setTimeout(function () {
+          if (scr) scr.classList.add('done');
+          setTimeout(function () { if (scr && scr.parentNode) scr.parentNode.removeChild(scr); }, 450);
+        }, 150);
+      };
+      setPct(100);
+    }
+    try {
+      if (document.fonts && document.fonts.load) {
+        Promise.all([document.fonts.load('800 20px Nunito'), document.fonts.load('900 20px Nunito'), document.fonts.load('700 20px Nunito')]).then(go, go);
+        setTimeout(go, 5000); // a blocked font server must not hold the game forever
+      } else go();
+    } catch (e) { go(); }
+  }
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
