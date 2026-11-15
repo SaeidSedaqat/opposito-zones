@@ -764,10 +764,11 @@
         this.gFx.lineStyle(2 * dpr, 0x3fa4e8, 0.6); this.gFx.strokeRoundedRect.apply(this.gFx, r.concat([6 * dpr]));
       });
       if ((fx.hover || []).length) {
-        // Check / Reveal aiming: soft tint on the cell or line under the pointer, ringed as one block.
-        fx.hover.forEach((i) => { this.gFx.fillStyle(0x3fa4e8, 0.14); this.gFx.fillRoundedRect.apply(this.gFx, rectFor(i).concat([6 * dpr])); });
+        // Check / Reveal aiming: the cell or line under the pointer, tinted and ringed as one block. Strong
+        // enough to read over the pastel zone colours (a 14% tint vanished on them).
+        fx.hover.forEach((i) => { this.gFx.fillStyle(0x3fa4e8, 0.34); this.gFx.fillRoundedRect.apply(this.gFx, rectFor(i).concat([6 * dpr])); });
         const a = rectFor(Math.min.apply(null, fx.hover)), b = rectFor(Math.max.apply(null, fx.hover)), m = 2 * dpr;
-        this.gFx.lineStyle(3 * dpr, 0x3fa4e8, 0.85);
+        this.gFx.lineStyle(4.5 * dpr, 0x1f7fd0, 1);
         this.gFx.strokeRoundedRect(a[0] - m, a[1] - m, b[0] + b[2] - a[0] + 2 * m, b[1] + b[3] - a[1] + 2 * m, 9 * dpr);
       }
       // Completion glow: a finished row, column or zone.
