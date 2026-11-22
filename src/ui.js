@@ -146,12 +146,29 @@
     const ds = dailyState();
     // Nothing under Daily Play: a solved Daily is reported in a popup when the button is tapped.
     home.querySelector('#hDailyS').hidden = true;
+    // Free Play and Daily Play open once Level C.unlockLevel is beaten: until then a lock icon.
+    const lk = !modesOpen();
+    for (const id of ['#hFree', '#hDaily']) {
+      const b = home.querySelector(id);
+      b.classList.toggle('locked', lk);
+      b.querySelector('.ico').outerHTML = ic(lk ? 'lock' : 'play-white');
+    }
   };
+  function modesOpen() { return S().level > C.unlockLevel; }
+  function lockedToast(name) { OP.audio.play('close', 0.6); toast('Finish Level ' + C.unlockLevel + ' to unlock ' + name); }
+  // Shown once, after beating Level C.unlockLevel.
+  function openUnlocked(cb) {
+    const m = modal('<div class="panel small unlocked"><h2>New modes unlocked!</h2>' +
+      '<div class="umodes"><span class="um green">' + ic('play-white') + 'Free Play</span><span class="um daily">' + ic('play-white') + 'Daily Play</span></div>' +
+      '<p>Play any size and difficulty, or try today&rsquo;s puzzle.</p><button class="btn primary" id="uOk">Great!</button></div>', { dismiss: false });
+    OP.audio.play('reward');
+    m.querySelector('#uOk').onclick = () => m.close(cb);
+  }
   home.querySelector('#hSet').onclick = () => openSettings();
   home.querySelector('#hShop').onclick = () => openShop();
   home.querySelector('#hLevels').onclick = () => OP.game.start('levels');
-  home.querySelector('#hFree').onclick = () => openFree();
-  home.querySelector('#hDaily').onclick = () => { const s = dailyState().solved; if (s) dailyDone(s); else OP.game.start('daily'); };
+  home.querySelector('#hFree').onclick = () => (modesOpen() ? openFree() : lockedToast('Free Play'));
+  home.querySelector('#hDaily').onclick = () => { if (!modesOpen()) return lockedToast('Daily Play'); const s = dailyState().solved; if (s) dailyDone(s); else OP.game.start('daily'); };
   function dailyDone(s) {
     modal('<div class="panel small daydone"><h2>Daily Play solved!</h2><div class="stats"><div><span>Time</span><b>' + fmtTime(s.time) + '</b></div></div>' +
       '<p>Come back tomorrow for a new puzzle.</p><button class="btn primary" data-x="close">OK</button></div>');
@@ -694,6 +711,6 @@
     show, refresh, get current() { return current; },
     msg, placeHud, setHud, setTimer, setBoosters, pointer, setLineNums,
     modal, modalOpen, openSettings, openPause, openShop, openHelp, openWin, maybeLogin, boosterAd,
-    rewardedAd, adBreak, playLoading, toast, fmtTime, dailyState, logoHtml, esc,
+    rewardedAd, adBreak, playLoading, toast, openUnlocked, fmtTime, dailyState, logoHtml, esc,
   };
 })();

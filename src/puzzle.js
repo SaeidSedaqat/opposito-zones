@@ -311,12 +311,12 @@
       3: { zones: [8, 10], w: [[2, 3], [4, 5], [6, 2]], two: [1, 5] },
       4: { zones: [9, 10], w: [[2, 4], [4, 5], [6, 1]], two: [2, 6] },
     },
-    // 8x8 (Free Play on big screens only): same zone sizes, about 1.7x as many zones.
+    // 8x8 (Free Play on big screens only): at most 14 zones, and zones may grow to 8 cells.
     8: {
-      1: { zones: [11, 13], w: [[2, 1], [4, 3], [6, 8]], two: [0, 3] },
-      2: { zones: [12, 15], w: [[2, 2], [4, 5], [6, 3]], two: [2, 6] },
-      3: { zones: [14, 17], w: [[2, 3], [4, 5], [6, 2]], two: [2, 8] },
-      4: { zones: [15, 18], w: [[2, 4], [4, 5], [6, 1]], two: [3, 10] },
+      1: { zones: [9, 11], w: [[2, 1], [4, 3], [6, 6], [8, 5]], two: [0, 2], max: 8 },
+      2: { zones: [10, 12], w: [[2, 2], [4, 4], [6, 5], [8, 3]], two: [1, 4], max: 8 },
+      3: { zones: [11, 13], w: [[2, 3], [4, 4], [6, 4], [8, 2]], two: [1, 5], max: 8 },
+      4: { zones: [12, 14], w: [[2, 4], [4, 4], [6, 3], [8, 1]], two: [2, 6], max: 8 },
     },
   };
   function zcfg(n, d) { const t = ZCFG[n] || ZCFG[6]; return t[d] || t[Math.max.apply(null, Object.keys(t).map(Number))]; }
@@ -328,9 +328,9 @@
   }
 
   // Random flood fill over the cells where zo[i] === free. Each zone grows from a seed until it is
-  // at least its target size AND balanced (so also even), never past 6 cells. A zone that gets
+  // at least its target size AND balanced (so also even), never past max cells (6, or 8 on 8x8). A zone that gets
   // stuck gives its cells back as leftovers (marked -2).
-  function flood(n, sol, rnd, w, zo, zones, free) {
+  function flood(n, sol, rnd, w, zo, zones, free, max) {
     const NB = neighbours(n), NN = n * n, left = [];
     for (;;) {
       // Seed on the free cell with the fewest free neighbours (random among ties): strands fewest cells.
@@ -347,7 +347,7 @@
       let bal = sol[s] ? 1 : -1, ok = false;
       for (;;) {
         if (cells.length >= target && bal === 0) { ok = true; break; }
-        if (cells.length >= 6) break;
+        if (cells.length >= max) break;
         const fr = [];
         for (const c of cells) for (const b of NB[c]) if (zo[b] === free && fr.indexOf(b) < 0) fr.push(b);
         if (!fr.length) break;
@@ -371,7 +371,7 @@
     const NB = neighbours(n), NN = n * n;
     for (let t = 0; t < 400; t++) {
       const zo = new Int8Array(NN).fill(-1), zones = [];
-      const left = flood(n, sol, rnd, cfg.w, zo, zones, -1);
+      const max = cfg.max || 6, left = flood(n, sol, rnd, cfg.w, zo, zones, -1, max);
       // Stranded leftovers: touching leftover cells form a cluster. A balanced cluster of at most
       // 6 cells becomes a zone of its own; a bigger balanced cluster is re-filled locally a few
       // times. An unbalanced cluster can never be fixed (merging it into a balanced neighbour
@@ -384,12 +384,12 @@
         for (let q = 0; q < comp.length; q++) for (const b of NB[comp[q]]) if (zo[b] === -2 && !seen.has(b)) { seen.add(b); comp.push(b); }
         let bal = 0; for (const c of comp) bal += sol[c] ? 1 : -1;
         if (bal !== 0) { bad = true; break; }
-        if (comp.length <= 6) { for (const c of comp) zo[c] = zones.length; zones.push(comp); if (rej) rej.leftoverMerged++; continue; }
+        if (comp.length <= max) { for (const c of comp) zo[c] = zones.length; zones.push(comp); if (rej) rej.leftoverMerged++; continue; }
         let fixed = false;
         for (let k = 0; k < 6 && !fixed; k++) {
           const zo2 = Int8Array.from(zo), z2 = zones.slice();
           for (const c of comp) zo2[c] = -3;
-          if (!flood(n, sol, rnd, cfg.w, zo2, z2, -3).length) { zo.set(zo2); zones.length = 0; for (const z of z2) zones.push(z); fixed = true; }
+          if (!flood(n, sol, rnd, cfg.w, zo2, z2, -3, max).length) { zo.set(zo2); zones.length = 0; for (const z of z2) zones.push(z); fixed = true; }
         }
         if (!fixed) bad = true; else if (rej) rej.leftoverMerged++;
       }
@@ -405,24 +405,58 @@
     return null;
   }
 
-  // Soft pastel fills (never strong orange or blue: those are the pieces). No two touching
-  // zones share a colour; colours repeat only when there are more zones than colours.
-  const PALETTE = [0xD9CFF2, 0xC4ECD9, 0xF1E4BE, 0xF7CDD8, 0xCCDBB6, 0xEEEAB4, 0xE5CBE3, 0xDCD8CE];
-  const PALETTE_NAMES = ['lilac', 'mint', 'sand', 'rose', 'sage', 'lemon', 'mauve', 'stone'];
+  // Soft pastel fills (never strong orange or blue: those are the pieces), picked so that no
+  // two of them look alike. Touching zones never share a colour and, where possible, never get
+  // two colours that are close (SIMILAR). A colour is reused only once every colour is in use,
+  // and then on a zone as far as possible (at least 3 zones away when it can) from its twin.
+  const PALETTE = [0xFBC1C6, 0xEFBCE8, 0xCAC8F8, 0xAEE6E2, 0xC2F0BE, 0xE6F2A0, 0xFCDD98, 0xDDCDBB, 0xDCDFE4];
+  const PALETTE_NAMES = ['rose', 'orchid', 'lavender', 'aqua', 'mint', 'lime', 'butter', 'stone', 'silver'];
+  const SIMILAR = (() => {
+    const lab = (h) => {
+      const v = [h >> 16 & 255, h >> 8 & 255, h & 255].map((x) => { x /= 255; return x > 0.04045 ? Math.pow((x + 0.055) / 1.055, 2.4) : x / 12.92; });
+      const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+      const X = f((v[0] * 0.4124 + v[1] * 0.3576 + v[2] * 0.1805) / 0.95047), Y = f(v[0] * 0.2126 + v[1] * 0.7152 + v[2] * 0.0722), Zc = f((v[0] * 0.0193 + v[1] * 0.1192 + v[2] * 0.9505) / 1.08883);
+      return [116 * Y - 16, 500 * (X - Y), 200 * (Y - Zc)];
+    };
+    const L = PALETTE.map(lab);
+    return L.map((a) => L.map((b) => a !== b && Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) < 21));
+  })();
   function colourZones(n, zones, rnd) {
-    const NB = neighbours(n), zo = new Int8Array(n * n), Z = zones.length;
+    const NB = neighbours(n), zo = new Int8Array(n * n), Z = zones.length, K = PALETTE.length;
     zones.forEach((z, k) => { for (const i of z) zo[i] = k; });
     const adj = zones.map(() => new Set());
     for (let i = 0; i < n * n; i++) for (const b of NB[i]) if (zo[b] !== zo[i]) adj[zo[i]].add(zo[b]);
-    const pal = shuffle(PALETTE.map((_, k) => k), rnd), col = new Array(Z).fill(-1), used = new Array(PALETTE.length).fill(0);
-    const rec = (k) => {
-      if (k === Z) return true;
-      const cand = pal.filter((c) => { for (const a of adj[k]) if (col[a] === c) return false; return true; }).sort((a, b) => used[a] - used[b]);
-      for (const c of cand) { col[k] = c; used[c]++; if (rec(k + 1)) return true; used[c]--; col[k] = -1; }
-      return false;
-    };
-    rec(0);
-    return col;
+    // Steps between zones over the "touches" graph.
+    const dist = zones.map((_, s) => {
+      const d = new Array(Z).fill(99), q = [s]; d[s] = 0;
+      for (let h = 0; h < q.length; h++) for (const b of adj[q[h]]) if (d[b] === 99) { d[b] = d[q[h]] + 1; q.push(b); }
+      return d;
+    });
+    const pal = shuffle(PALETTE.map((_, k) => k), rnd), rank = new Array(K);
+    pal.forEach((c, r) => { rank[c] = r; });
+    // Strictest rules first; relax only if a board cannot be coloured under them.
+    for (const [sim, minD] of [[1, 3], [1, 2], [0, 3], [0, 2]]) {
+      const col = new Array(Z).fill(-1), used = new Array(K).fill(0);
+      let steps = 0;
+      const near = (k, c) => { let m = 99; for (let j = 0; j < Z; j++) if (col[j] === c && dist[k][j] < m) m = dist[k][j]; return m; };
+      const rec = (k) => {
+        if (k === Z) return true;
+        if (++steps > 20000) return false;
+        const cand = [];
+        for (let c = 0; c < K; c++) {
+          const d = near(k, c);
+          if (d < minD) continue;
+          let ok = true;
+          if (sim) for (const a of adj[k]) if (col[a] >= 0 && SIMILAR[c][col[a]]) { ok = false; break; }
+          if (ok) cand.push([c, d]);
+        }
+        cand.sort((a, b) => used[a[0]] - used[b[0]] || b[1] - a[1] || rank[a[0]] - rank[b[0]]);
+        for (const [c] of cand) { col[k] = c; used[c]++; if (rec(k + 1)) return true; used[c]--; col[k] = -1; }
+        return false;
+      };
+      if (rec(0)) return col;
+    }
+    return zones.map((_, k) => k % K); // never reached: a planar map always has a 4-colouring
   }
 
   // ---------- generator ----------
@@ -434,7 +468,10 @@
     const n = opts.n, target = opts.diff, cfg = zcfg(n, target), t0 = now(), base = String(opts.seed);
     const maxAttempts = opts.attempts || [0, 40, 80, 60, 400][target];
     const rej = newRej(), natural = [0, 0, 0, 0, 0];
-    let best = null;
+    // Overlap goal per size (Medium and up) and how many on-target boards to compare at most.
+    const meetMin = target < 2 ? 0 : (opts.meetMin != null ? opts.meetMin : { 4: 2, 6: 4, 8: 5 }[n] || 4);
+    const keep = opts.keep || [0, 1, 10, 12, 3][target];
+    let best = null, hit = null, hits = 0;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const rnd = mulberry32(hashStr(base + '#' + attempt));
       const sol = genSolution(n, rnd);
@@ -466,22 +503,31 @@
         rating: res.tier, diff: target, seed: base, attempt,
         dev: { givens, used: res.stats, noZone, zones: zones.length, sizes: zones.map((z) => z.length) },
       };
-      if (res.tier === target) { best = out; break; }
+      if (res.tier === target) {
+        // On target: keep the board with the most "zone meets line" moves out of a few
+        // candidates (stop early once one has enough), so overlap reasoning shows up often.
+        const m = res.stats.meet || 0;
+        hits++;
+        if (!hit || m > (hit.dev.used.meet || 0)) hit = out;
+        if (target < 2 || m >= meetMin || hits >= keep) break;
+        continue;
+      }
       rej.offTarget++;
       if (!best || Math.abs(res.tier - target) < Math.abs(best.rating - target) ||
           (Math.abs(res.tier - target) === Math.abs(best.rating - target) && res.tier > best.rating)) best = out;
     }
+    if (hit) { best = hit; best.dev.hits = hits; }
     if (!best) return generate(Object.assign({}, opts, { seed: base + '*' })); // never seen in testing
     best.dev.rej = rej; best.dev.natural = natural; best.dev.ms = Math.round((now() - t0) * 10) / 10;
     return best;
   }
 
   // count seeds per difficulty for one size; one row per board (benchmark for the report).
-  function bench(n, diffs, count, prefix) {
+  function bench(n, diffs, count, prefix, opts) {
     const rows = [];
     for (const d of diffs) for (let s = 0; s < count; s++) {
-      const pz = generate({ n, diff: d, seed: prefix + s });
-      rows.push({ n, seed: pz.seed, diff: d, rating: pz.rating, ms: pz.dev.ms, attempt: pz.attempt, givens: pz.dev.givens, zones: pz.dev.zones, noZone: pz.dev.noZone, used: pz.dev.used, rej: pz.dev.rej, natural: pz.dev.natural });
+      const pz = generate(Object.assign({ n, diff: d, seed: prefix + s }, opts || {}));
+      rows.push({ n, seed: pz.seed, diff: d, rating: pz.rating, meet: (pz.dev.used && pz.dev.used.meet) || 0, hits: pz.dev.hits || 0, sizes: pz.dev.sizes, ms: pz.dev.ms, attempt: pz.attempt, givens: pz.dev.givens, zones: pz.dev.zones, noZone: pz.dev.noZone, used: pz.dev.used, rej: pz.dev.rej, natural: pz.dev.natural });
     }
     return rows;
   }
@@ -558,7 +604,7 @@
     self.onmessage = (e) => {
       const { id, opts, bench: b } = e.data;
       try {
-        if (b) self.postMessage({ id, rows: bench(b.n, b.diffs, b.count, b.prefix) });
+        if (b) self.postMessage({ id, rows: bench(b.n, b.diffs, b.count, b.prefix, b.opts) });
         else self.postMessage({ id, puzzle: generate(opts) });
       } catch (err) { self.postMessage({ id, error: String(err && err.message || err) }); }
     };

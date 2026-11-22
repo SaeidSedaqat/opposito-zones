@@ -213,9 +213,7 @@
     const go = (p) => {
       OP.ui.playLoading(false);
       OP.ui.show('game');
-      const needAd = (which === 'levels' && spec.level >= 4) || which === 'free';
-      if (needAd) OP.ui.adBreak(() => begin(which, spec, p));
-      else begin(which, spec, p);
+      begin(which, spec, p);
     };
     const ready = (p) => { if (quick) go(p); else setTimeout(() => go(p), Math.max(0, 1000 - (Date.now() - t0))); };
     if (resume) ready(null); else obtain(spec, ready);
@@ -343,7 +341,9 @@
     curObj().levels = null;
     OP.save.persist();
     prefetch(C.levelSpec(S().level));
-    OP.ui.openWin({ mode: 'levels', coins, bonus, next: () => start('levels'), home: () => OP.ui.show('home') });
+    // Beating Level C.unlockLevel opens Free Play and Daily Play: say so before moving on.
+    const then = (f) => (spec.level === C.unlockLevel ? () => OP.ui.openUnlocked(f) : f);
+    OP.ui.openWin({ mode: 'levels', coins, bonus, next: then(() => (S().level >= 4 ? OP.ui.adBreak(() => start('levels')) : start('levels'))), home: then(() => OP.ui.show('home')) });
   }
   function winFree() {
     const coins = C.freeReward(curSpec.n, curSpec.diff);
@@ -351,7 +351,7 @@
     curObj().free = null;
     OP.save.persist();
     OP.audio.play('coin');
-    OP.ui.openWin({ mode: 'free', coins, label: 'Nice work!', next: () => start('free'), home: () => OP.ui.show('home') });
+    OP.ui.openWin({ mode: 'free', coins, label: 'Nice work!', next: () => OP.ui.adBreak(() => start('free')), home: () => OP.ui.show('home') });
   }
   function winDaily() {
     const d = S().daily, t = C.today(), y = C.dayKeyOffset(t.key, -1);
