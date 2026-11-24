@@ -13,13 +13,9 @@
     hint: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 0-4.2 12.6c.7.5 1.2 1.3 1.2 2.2V18h6v-1.2c0-.9.5-1.7 1.2-2.2A7 7 0 0 0 12 2z"/><rect x="9" y="19.3" width="6" height="2.7" rx="1.3" fill="currentColor"/></svg>',
     check: '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="7" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M15.6 15.6L21 21" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M7.3 10.6l2.2 2.2 4-4.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     reveal: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 5C6.5 5 2.7 9.5 1.5 12c1.2 2.5 5 7 10.5 7s9.3-4.5 10.5-7C21.3 9.5 17.5 5 12 5zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>',
-    home: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3l9 8h-2.5v9.5h-5v-6h-3v6h-5V11H3z"/></svg>',
-    play: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.2v13.6c0 .8.9 1.3 1.6.8l10-6.8a1 1 0 0 0 0-1.6l-10-6.8C8.9 3.9 8 4.4 8 5.2z"/></svg>',
     lock: '<svg viewBox="0 0 24 24"><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="5" y="10.5" width="14" height="10.5" rx="2.6" fill="currentColor"/></svg>',
     ad: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3.5" fill="currentColor"/><path d="M10 9v6l5-3z" fill="#fff"/></svg>',
     tick: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    cross: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
-    help: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" opacity="0"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.5.8c0 1.6-1.3 2-2.1 2.7-.5.5-.6.9-.6 1.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17.4" r="1.3" fill="currentColor"/></svg>',
     coin: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#F5B83D"/><circle cx="12" cy="12" r="7.2" fill="#FFD36B"/><path d="M12 7.6l1.3 2.9 3.1.3-2.4 2 .8 3.1-2.8-1.7-2.8 1.7.8-3.1-2.4-2 3.1-.3z" fill="#F0A92E"/></svg>',
     gift: '<svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="5" rx="1.5" fill="currentColor"/><rect x="4.5" y="13" width="15" height="8" rx="1.5" fill="currentColor" opacity=".85"/><rect x="11" y="9" width="2" height="12" fill="#fff" opacity=".8"/><path d="M12 9C10 5 6 5 7 7.5S12 9 12 9zm0 0c2-4 6-4 5-1.5S12 9 12 9z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
     sound: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h3.5L12 5v14l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
@@ -37,7 +33,7 @@
     mHome: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.7 3.1a1 1 0 0 0-1.4 0l-8.6 8a1 1 0 0 0 .7 1.7H5v7.4a1.3 1.3 0 0 0 1.3 1.3h3.6v-5.4a1 1 0 0 1 1-1h2.2a1 1 0 0 1 1 1v5.4h3.6a1.3 1.3 0 0 0 1.3-1.3v-7.4h1.6a1 1 0 0 0 .7-1.7z"/></svg>',
   };
   // Button icons: generated WebP art (assets/art/ui); the SVGs above are only a fallback for keys without art.
-  const ART = ['back', 'pause', 'undo', 'hint', 'check', 'reveal', 'home', 'play', 'lock', 'ad', 'tick', 'cross', 'help', 'coin', 'play-white', 'ad-white'];
+  const ART = ['back', 'pause', 'undo', 'hint', 'check', 'reveal', 'lock', 'ad', 'tick', 'coin', 'play-white', 'ad-white'];
   const ic = (k) => '<i class="ico">' + (ART.indexOf(k) >= 0 ? '<img alt="" draggable="false" src="assets/art/ui/' + k + '.webp?v=' + OP.config.VERSION + '">' : ICON[k]) + '</i>';
   // Check / Reveal icons: their art over a little 3x3 grid that shows what they act on --
   // Check lights up one cell, Reveal a whole row.
