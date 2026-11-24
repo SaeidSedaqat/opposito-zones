@@ -316,7 +316,8 @@
     if (L.compact) {
       // The board fills the right side here, so the timer sits beside the pause button instead.
       tim.style.left = sx.l + 12 + 75 + 12 + 'px'; tim.style.right = 'auto'; tim.style.top = sx.t + 30 + 'px';
-      skip.style.left = sx.l + 12 + 75 + 12 + 'px'; skip.style.right = 'auto'; skip.style.top = sx.t + 30 + 'px'; // beside the pause button, where the Daily timer goes
+      // Beside the pause button, where the Daily timer goes; in its place on Level 1, which has no pause.
+      skip.style.left = sx.l + 12 + (pause.hidden ? 0 : 75 + 12) + 'px'; skip.style.right = 'auto'; skip.style.top = sx.t + (pause.hidden ? 16 : 30) + 'px';
       const colW = Math.max(120, L.x - sx.l - 24);
       lab.style.cssText = 'left:' + (sx.l + 12) + 'px;top:' + (sx.t + 94) + 'px;width:' + colW + 'px;transform:none;text-align:left;align-items:flex-start';
       msgEl.style.cssText = 'left:' + (sx.l + 12) + 'px;top:' + (sx.t + 166) + 'px;width:' + colW + 'px;transform:none;justify-content:flex-start;text-align:left;height:auto;min-height:40px';
