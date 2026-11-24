@@ -69,7 +69,7 @@
   function dateLabel(t) { return MONTHS[t.m] + ' ' + t.day + ', ' + t.y; }
 
   OP.config = {
-    VERSION: '0.2.38',
+    VERSION: '0.2.39',
     DIFFS,
     SIZES: [4, 6, 8],
     coins: [0, 10, 20, 30, 50],      // by diff (1..4)

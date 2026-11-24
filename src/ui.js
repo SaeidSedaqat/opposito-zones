@@ -7,8 +7,6 @@
 
   // ---------- original UI icons ----------
   const ICON = {
-    gear: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M10.6 2h2.8l.5 2.6c.6.2 1.2.5 1.7.9l2.5-.9 1.4 2.4-2 1.7c.1.6.1 1.3 0 1.9l2 1.7-1.4 2.4-2.5-.9c-.5.4-1.1.7-1.7.9l-.5 2.6h-2.8l-.5-2.6c-.6-.2-1.2-.5-1.7-.9l-2.5.9-1.4-2.4 2-1.7a6 6 0 0 1 0-1.9l-2-1.7 1.4-2.4 2.5.9c.5-.4 1.1-.7 1.7-.9zM12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8z" transform="translate(0 1.5)"/></svg>',
-    bag: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 8h12l1 12.2c.1.9-.6 1.8-1.6 1.8H6.6c-1 0-1.7-.9-1.6-1.8z"/><path d="M9 10V7a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     pause: '<svg viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.6" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.6" fill="currentColor"/></svg>',
     undo: '<svg viewBox="0 0 24 24"><path d="M9 7H5V3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 7.2A8 8 0 1 1 4.6 15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
@@ -33,14 +31,13 @@
     mRestart: '<svg viewBox="0 0 24 24"><path d="M19 12.5A7 7 0 1 1 16.6 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><path fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" d="M20.2 3.6v6.2H14z"/></svg>',
     mShop: '<svg viewBox="0 0 24 24"><g fill="currentColor"><path d="M4.75 3H7.7L6.75 9.2a1.95 1.95 0 0 1-3.9 0z"/><path d="M8.6 3h2.95v6.2a1.95 1.95 0 0 1-3.9 0z"/><path d="M12.45 3h2.95l.95 6.2a1.95 1.95 0 0 1-3.9 0z"/><path d="M16.3 3h2.95l1.9 6.2a1.95 1.95 0 0 1-3.9 0z"/><path fill-rule="evenodd" d="M4.2 12.9h15.6v7.6a1.3 1.3 0 0 1-1.3 1.3H11v-7.2H6.4v7.2h-.9a1.3 1.3 0 0 1-1.3-1.3zM13.2 14.6h4.6v3.9h-4.6z"/></g></svg>',
     mGear: '<svg viewBox="0 0 24 24"><path fill="currentColor" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill-rule="evenodd" d="M9.8 5.04L10.15 2.48L13.85 2.48L14.2 5.04A7.3 7.3 0 0 1 15.37 5.52L17.42 3.96L20.04 6.58L18.48 8.63A7.3 7.3 0 0 1 18.96 9.8L21.52 10.15L21.52 13.85L18.96 14.2A7.3 7.3 0 0 1 18.48 15.37L20.04 17.42L17.42 20.04L15.37 18.48A7.3 7.3 0 0 1 14.2 18.96L13.85 21.52L10.15 21.52L9.8 18.96A7.3 7.3 0 0 1 8.63 18.48L6.58 20.04L3.96 17.42L5.52 15.37A7.3 7.3 0 0 1 5.04 14.2L2.48 13.85L2.48 10.15L5.04 9.8A7.3 7.3 0 0 1 5.52 8.63L3.96 6.58L6.58 3.96L8.63 5.52A7.3 7.3 0 0 1 9.8 5.04ZM12 7.9a4.1 4.1 0 1 0 0 8.2a4.1 4.1 0 1 0 0-8.2Z"/></svg>', // 8 identical teeth, computed around the centre so every side matches
-    mBag: '<svg viewBox="0 0 24 24"><path d="M8.7 9.5V7a3.3 3.3 0 0 1 6.6 0v2.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path fill="currentColor" d="M5.2 8.5h13.6a1 1 0 0 1 1 1.1l-1 10.5a1.6 1.6 0 0 1-1.6 1.4H6.8a1.6 1.6 0 0 1-1.6-1.4l-1-10.5a1 1 0 0 1 1-1.1z"/></svg>',
     mSound: '<svg viewBox="0 0 24 24"><path fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" d="M3.5 9.2h3.6l5-4.2v14l-5-4.2H3.5z"/><path d="M15.6 9.2a4 4 0 0 1 0 5.6M18.4 6.4a8 8 0 0 1 0 11.2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
     mMusic: '<svg viewBox="0 0 24 24"><path d="M9.2 17.5V6.2l10.6-2.4v11.4" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="6.4" cy="17.6" r="3.2" fill="currentColor"/><circle cx="17" cy="15.4" r="3.2" fill="currentColor"/></svg>',
     mHelp: '<svg viewBox="0 0 24 24"><path d="M8.6 8.8a3.5 3.5 0 1 1 4.9 3.2c-1.1.5-1.5 1.2-1.5 2.3v.6" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="19.6" r="2" fill="currentColor"/></svg>',
     mHome: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.7 3.1a1 1 0 0 0-1.4 0l-8.6 8a1 1 0 0 0 .7 1.7H5v7.4a1.3 1.3 0 0 0 1.3 1.3h3.6v-5.4a1 1 0 0 1 1-1h2.2a1 1 0 0 1 1 1v5.4h3.6a1.3 1.3 0 0 0 1.3-1.3v-7.4h1.6a1 1 0 0 0 .7-1.7z"/></svg>',
   };
   // Button icons: generated WebP art (assets/art/ui); the SVGs above are only a fallback for keys without art.
-  const ART = ['gear', 'bag', 'back', 'pause', 'undo', 'hint', 'check', 'reveal', 'home', 'play', 'lock', 'ad', 'tick', 'cross', 'help', 'coin', 'play-white', 'ad-white'];
+  const ART = ['back', 'pause', 'undo', 'hint', 'check', 'reveal', 'home', 'play', 'lock', 'ad', 'tick', 'cross', 'help', 'coin', 'play-white', 'ad-white'];
   const ic = (k) => '<i class="ico">' + (ART.indexOf(k) >= 0 ? '<img alt="" draggable="false" src="assets/art/ui/' + k + '.webp?v=' + OP.config.VERSION + '">' : ICON[k]) + '</i>';
   // Check / Reveal icons: their art over a little 3x3 grid that shows what they act on --
   // Check lights up one cell, Reveal a whole row.
@@ -596,7 +593,7 @@
     const m = modal('<div class="panel boostad">' + XBTN + '<h2>Out of ' + name + '</h2>' +
       '<div class="bgift">' + icon + '<b>+' + amt + ' ' + label + '</b></div>' +
       '<div class="bbtns"><button class="btn primary watch" id="bWatch">' + ic('ad-white') + '<span>Watch Ad</span></button>' +
-      '<button class="btn gold watch" id="bBuy">' + ic('coin') + '<span>' + C.boosterPrice[pre] + '</span></button></div></div>');
+      '<button class="btn gold watch' + (S().coins < C.boosterPrice[pre] ? ' poor' : '') + '" id="bBuy">' + ic('coin') + '<span>' + C.boosterPrice[pre] + '</span></button></div></div>');
     m.querySelector('#bBuy').onclick = () => {
       if (!buyBooster(pre)) return;
       m.close(() => { if (done) done(); });
