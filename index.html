@@ -30,8 +30,8 @@
 <style>
 @font-face{
   font-family:'Nunito';
-  src:url('assets/fonts/nunito-latin.woff2?v=0.2.53') format('woff2-variations'),
-      url('assets/fonts/nunito-latin.woff2?v=0.2.53') format('woff2');
+  src:url('assets/fonts/nunito-latin.woff2?v=0.2.54') format('woff2-variations'),
+      url('assets/fonts/nunito-latin.woff2?v=0.2.54') format('woff2');
   font-weight:200 1000; font-style:normal; font-display:swap;
 }
 :root{
@@ -43,13 +43,13 @@
 html,body{height:100%;margin:0;}
 body{
   background-color:var(--bg); color:var(--ink);
-  background-image:url(assets/art/bg.webp?v=0.2.53);
+  background-image:url(assets/art/bg.webp?v=0.2.54);
   background-size:cover; background-position:center;
   font-family:'Nunito',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   overscroll-behavior:none; touch-action:none; user-select:none;
   -webkit-tap-highlight-color:transparent; -webkit-user-select:none;
 }
-body.skinbg{background-image:var(--skinbg), url(assets/art/bg.webp?v=0.2.53); background-blend-mode:color, normal;} /* skin tint over the same bokeh art (ui.js applySkinBg) */
+body.skinbg{background-image:var(--skinbg), url(assets/art/bg.webp?v=0.2.54); background-blend-mode:color, normal;} /* skin tint over the same bokeh art (ui.js applySkinBg) */
 [hidden]{display:none!important;}
 button{font-family:inherit; border:none; background:none; color:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent;}
 button:disabled{cursor:default; opacity:.5;}
@@ -60,7 +60,7 @@ img{display:block; max-width:100%;}
 #loading{position:fixed; inset:0; z-index:50; background:#000;
   display:flex; align-items:center; justify-content:center; transition:opacity .45s ease;}
 /* Black until the logo AND the background art have loaded, then both fade in together (.lit, 0.5 s, default ease). */
-#loading::before{content:""; position:absolute; inset:0; background:var(--bg) url(assets/art/bg.webp?v=0.2.53) center/cover; opacity:0; transition:opacity .5s ease;}
+#loading::before{content:""; position:absolute; inset:0; background:var(--bg) url(assets/art/bg.webp?v=0.2.54) center/cover; opacity:0; transition:opacity .5s ease;}
 #loading .logoart{opacity:0; transition:opacity .5s ease;}
 #loading.lit::before, #loading.lit .logoart{opacity:1;}
 #loading.done{opacity:0; pointer-events:none;}
@@ -84,7 +84,9 @@ img{display:block; max-width:100%;}
 .screen.on{opacity:1;}
 
 /* ---------- top bar / shared bits ---------- */
-.topbar{position:absolute; top:0; left:0; right:0; height:60px; display:flex; align-items:center; gap:10px; padding:0 14px; z-index:2;}
+:root{--sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px); --top:calc(var(--sat) + 12px);} /* notch room + a little extra breathing space (0.2.54) */
+#safeProbe{position:fixed; left:0; top:0; width:0; height:0; padding-top:var(--sat); padding-bottom:var(--sab); visibility:hidden; pointer-events:none;}
+.topbar{position:absolute; top:var(--top); left:0; right:0; height:60px; display:flex; align-items:center; gap:10px; padding:0 14px; z-index:2;}
 .topbar.tall{height:90px; padding:0 16px;}
 .topbar.tall .circ{width:75px; height:75px; min-width:75px; border-width:22px 24px 27px;}
 .topbar.tall .circ .ico{width:42px; height:42px; margin:-12px;}
@@ -97,7 +99,7 @@ html:not(.land) .topbar.tall .circ .ico, html:not(.land) #gPause .ico{width:34px
 html:not(.land) .topbar.tall .coins{font-size:22px; gap:7px; padding:10px 17px; border-radius:24px;}
 html:not(.land) .topbar.tall .coins .ico{width:29px; height:29px;}
 .grow{flex:1;}
-.circ{width:50px; height:50px; min-width:50px; box-sizing:border-box; border:solid transparent; border-width:15px 16px 18px; border-image:url(assets/art/ui/btn-white.webp?v=0.2.53) 45% 30% 50% 30% fill; filter:drop-shadow(0 4px 6px rgba(35,42,59,.14));
+.circ{width:50px; height:50px; min-width:50px; box-sizing:border-box; border:solid transparent; border-width:15px 16px 18px; border-image:url(assets/art/ui/btn-white.webp?v=0.2.54) 45% 30% 50% 30% fill; filter:drop-shadow(0 4px 6px rgba(35,42,59,.14));
   display:flex; align-items:center; justify-content:center; color:var(--ink); transition:transform .12s ease;}
 .circ:active{transform:scale(.9);}
 .circ .ico{width:28px; height:28px; margin:-8px;}
@@ -113,7 +115,7 @@ html:not(.land) .topbar.tall .coins .ico{width:29px; height:29px;}
 
 /* ---------- buttons ---------- */
 .btn{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; box-sizing:border-box; white-space:nowrap; min-height:62px; padding:0 6px;
-  border:solid transparent; border-width:16px 22px 20px; border-image:url(assets/art/ui/btn-white.webp?v=0.2.53) 45% 25% 50% 25% fill;
+  border:solid transparent; border-width:16px 22px 20px; border-image:url(assets/art/ui/btn-white.webp?v=0.2.54) 45% 25% 50% 25% fill;
   background:none; color:var(--ink); font-weight:900; font-size:19px; filter:drop-shadow(0 6px 8px rgba(35,42,59,.16)); transition:transform .12s ease;}
 .btn:active{transform:scale(.96) translateY(2px);}
 /* Corners drawn at one uniform scale of the art (top 45%, sides 25%, bottom 50% slices), so they stay round instead of squashed. */
@@ -122,16 +124,16 @@ html:not(.land) .topbar.tall .coins .ico{width:29px; height:29px;}
 .pill{border-image-width:14px 13px 16px; will-change:transform; backface-visibility:hidden;}
 .circ{will-change:transform; backface-visibility:hidden;}
 .btn .ico{width:28px; height:28px;}
-.btn.primary{border-image-source:url(assets/art/ui/btn-orange.webp?v=0.2.53); color:#fff; text-shadow:0 2px 0 rgba(150,50,10,.45);}
-.btn.gold{border-image-source:url(assets/art/ui/btn-gold.webp?v=0.2.53); color:#6A4305; text-shadow:0 1px 0 rgba(255,255,255,.55);}
+.btn.primary{border-image-source:url(assets/art/ui/btn-orange.webp?v=0.2.54); color:#fff; text-shadow:0 2px 0 rgba(150,50,10,.45);}
+.btn.gold{border-image-source:url(assets/art/ui/btn-gold.webp?v=0.2.54); color:#6A4305; text-shadow:0 1px 0 rgba(255,255,255,.55);}
 .btn.warn{color:#D2402C;}
 .btn.flat{border-image:none; border-color:transparent; filter:none; color:var(--sub); min-height:44px;}
 .btn.big{flex-direction:column; gap:2px; min-height:86px; border-width:18px 24px 24px;}
 .btn.big .t{font-size:25px; line-height:1.1;}
 .btn.big .s{font-size:15px; font-weight:800; color:var(--sub); text-shadow:none;}
 .btn.primary.big .s{color:#FFF1E8; text-shadow:0 1px 0 rgba(150,50,10,.35);}
-.btn.daily{border-image-source:url(assets/art/ui/btn-navy.webp?v=0.2.53); color:#fff; text-shadow:0 2px 0 rgba(10,20,60,.5);}
-.btn.green{border-image-source:url(assets/art/ui/btn-green.webp?v=0.2.53); color:#fff; text-shadow:0 2px 0 rgba(10,70,40,.45);}
+.btn.daily{border-image-source:url(assets/art/ui/btn-navy.webp?v=0.2.54); color:#fff; text-shadow:0 2px 0 rgba(10,20,60,.5);}
+.btn.green{border-image-source:url(assets/art/ui/btn-green.webp?v=0.2.54); color:#fff; text-shadow:0 2px 0 rgba(10,70,40,.45);}
 .btn.daily .s{color:#D3DCF5; text-shadow:0 1px 0 rgba(10,20,60,.4);}
 .btn.play{flex-direction:row; position:relative;}
 .btn.play .ico{width:32px; height:32px; position:absolute; left:2px; top:50%; transform:translateY(-50%);}
@@ -149,7 +151,7 @@ html:not(.land) .topbar.tall .coins .ico{width:29px; height:29px;}
 .footrow > .btn{flex:0 0 min(130px, calc(50% - 15px));}
 /* Wide screens (html.land): same stacked Home, bigger logo, landscape reference size. */
 html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo stays on top in every orientation */
-.btn.foot{border-image-source:url(assets/art/ui/btn-orange.webp?v=0.2.53); min-height:86px; border-width:18px 24px 24px; border-image-width:22px 20px 25px;}
+.btn.foot{border-image-source:url(assets/art/ui/btn-orange.webp?v=0.2.54); min-height:86px; border-width:18px 24px 24px; border-image-width:22px 20px 25px;}
 .btn.foot{color:#fff;}
 .btn.foot .ico{width:58px; height:58px; margin:-10px 0;}
 .btn.foot .ico svg{width:100%; height:100%; filter:drop-shadow(0 2px 0 rgba(150,50,10,.45));} /* flat white icons, same look as the Pause/Settings buttons */
@@ -158,9 +160,9 @@ html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo s
 .lbl{font-size:13px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:.04em; margin-top:8px;}
 .pills{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
 #fDiff{grid-template-columns:repeat(2,1fr);}
-.pill{min-height:50px; padding:0; white-space:nowrap; border:solid transparent; border-width:13px 12px 16px; border-image:url(assets/art/ui/btn-white.webp?v=0.2.53) 45% 25% 50% 25% fill; filter:drop-shadow(0 4px 6px rgba(35,42,59,.14)); font-weight:900; font-size:16px; color:var(--sub); transition:transform .12s ease,color .15s;}
+.pill{min-height:50px; padding:0; white-space:nowrap; border:solid transparent; border-width:13px 12px 16px; border-image:url(assets/art/ui/btn-white.webp?v=0.2.54) 45% 25% 50% 25% fill; filter:drop-shadow(0 4px 6px rgba(35,42,59,.14)); font-weight:900; font-size:16px; color:var(--sub); transition:transform .12s ease,color .15s;}
 .pill:active{transform:scale(.95);}
-.pill.on{border-image-source:url(assets/art/ui/btn-orange.webp?v=0.2.53); color:#fff; text-shadow:0 2px 0 rgba(150,50,10,.45);}
+.pill.on{border-image-source:url(assets/art/ui/btn-orange.webp?v=0.2.54); color:#fff; text-shadow:0 2px 0 rgba(150,50,10,.45);}
 .pill:disabled{opacity:.35; filter:grayscale(1); cursor:default; transform:none;}
 .toggles{display:flex; flex-direction:column; gap:10px; margin-top:6px;}
 .toggles.col{margin:10px 0;}
@@ -173,7 +175,7 @@ html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo s
 .play{margin-top:8px;}
 
 /* ---------- shop ---------- */
-.shopbody{position:absolute; inset:90px 0 0 0; overflow:hidden; padding:10px 14px 16px; max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:12px;}
+.shopbody{position:absolute; inset:calc(90px + var(--top)) 0 var(--sab) 0; overflow:hidden; padding:10px 14px 16px; max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:12px;}
 .cardwrap{flex:1; min-height:0; display:flex; container-type:size;}
 /* Boosters for coins, one row above the skins. */
 /* Cards keep a card shape (at most 1.7x as tall as wide) instead of stretching to fill tall phones. */
@@ -183,7 +185,7 @@ html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo s
 .mini{flex:none; width:min(100%, calc((100cqh - 82px) * 2)); aspect-ratio:2/1; border-radius:12px; display:flex; gap:6px; padding:6px; margin-bottom:2px; box-sizing:border-box;}
 .mini i{flex:1; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.55); border-radius:8px;}
 .mini i img{width:84%; height:84%; object-fit:contain;}
-.nm{font-size:12.5px; font-weight:800; text-align:center; line-height:1.2;}
+.nm{font-size:min(12.5px,10.5cqw); font-weight:800; text-align:center; line-height:1.2; white-space:nowrap; max-width:100%;} /* always one line, so every card's price lines up */
 .st{display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; max-width:100%; box-sizing:border-box; font-size:min(20px,12.5cqw); font-weight:900; padding:.4em .5em; border-radius:14px; color:var(--sub); background:#EEF1F6;}
 .st .ico{width:1.15em; height:1.15em;}
 .card.equipped .st{background:#E7F7EE; color:var(--good);}
@@ -241,9 +243,9 @@ html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo s
 .ico.combo{position:relative;}
 .ico.combo svg{position:absolute; left:0; top:0; width:74%; height:74%;}
 .ico.combo img{position:absolute; right:-8%; bottom:-8%; width:66%; height:66%; filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));}
-.hand{position:absolute; z-index:4; width:52px; height:52px; margin:-3px 0 0 -10px; pointer-events:none; transform:translateY(0);}
+.hand{position:absolute; z-index:4; width:72px; height:72px; margin:-5px 0 0 -42px; pointer-events:none; transform:translateY(0);}
 .hand img{display:block; width:100%; height:100%; filter:drop-shadow(0 0 1px rgba(44,52,69,.9)) drop-shadow(0 3px 5px rgba(0,0,0,.3));}
-.hand .ring{position:absolute; left:50%; top:12%; width:52px; height:52px; margin:-26px 0 0 -26px; border-radius:50%;
+.hand .ring{position:absolute; left:59%; top:7%; width:56px; height:56px; margin:-28px 0 0 -28px; border-radius:50%;
   border:3px solid var(--ice); opacity:0; display:block;}
 .hand.again{animation:handTap .9s ease-in-out infinite;}
 .hand.again .ring{animation:ringPulse .9s ease-in-out infinite;}
@@ -370,7 +372,7 @@ html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo s
 /* ---------- win panel ---------- */
 .panel.win{align-items:center; text-align:center;}
 .solved{background:linear-gradient(135deg,var(--fire),var(--ice)); -webkit-background-clip:text; background-clip:text; color:transparent;}
-.wrays{position:fixed; will-change:rotate,transform,opacity; left:50%; width:560px; height:560px; margin:-280px 0 0 -280px; pointer-events:none; background:radial-gradient(circle,#FFF3C4 0%,#FFC23D 45%,#FF9F3D 100%); -webkit-mask:url(assets/art/fx/rays.webp?v=0.2.53) center/contain no-repeat; mask:url(assets/art/fx/rays.webp?v=0.2.53) center/contain no-repeat; opacity:0;}
+.wrays{position:fixed; will-change:rotate,transform,opacity; left:50%; width:560px; height:560px; margin:-280px 0 0 -280px; pointer-events:none; background:radial-gradient(circle,#FFF3C4 0%,#FFC23D 45%,#FF9F3D 100%); -webkit-mask:url(assets/art/fx/rays.webp?v=0.2.54) center/contain no-repeat; mask:url(assets/art/fx/rays.webp?v=0.2.54) center/contain no-repeat; opacity:0;}
 .modal.on .wrays{opacity:.9; transform:scale(1); animation:wrin .6s cubic-bezier(.2,1.4,.4,1) both, wspin 14s linear infinite;}
 @keyframes wrin{from{opacity:0; transform:scale(.3);} to{opacity:.9; transform:scale(1);}}
 @keyframes wspin{from{rotate:0deg;} to{rotate:360deg;}}
@@ -383,7 +385,7 @@ html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo s
 .btn.dbl .ico{width:26px; height:26px;}
 .modal.on .panel.win .solved{animation:wpop .55s cubic-bezier(.2,1.6,.4,1) both .1s;}
 @keyframes wpop{0%{transform:scale(.3); opacity:0;} 100%{transform:scale(1); opacity:1;}}
-.wspark{position:absolute; width:30px; height:30px; pointer-events:none; background:#FFB020; -webkit-mask:url(assets/art/fx/spark.webp?v=0.2.53) center/contain no-repeat; mask:url(assets/art/fx/spark.webp?v=0.2.53) center/contain no-repeat; animation:wtw 1.6s ease-in-out infinite; transform:scale(0);}
+.wspark{position:absolute; width:30px; height:30px; pointer-events:none; background:#FFB020; -webkit-mask:url(assets/art/fx/spark.webp?v=0.2.54) center/contain no-repeat; mask:url(assets/art/fx/spark.webp?v=0.2.54) center/contain no-repeat; animation:wtw 1.6s ease-in-out infinite; transform:scale(0);}
 @keyframes wtw{0%,100%{transform:scale(0) rotate(0deg);} 50%{transform:scale(1) rotate(90deg);}}
 #wCoins.pop{animation:cpop .35s ease-out;}
 @keyframes cpop{50%{transform:scale(1.35);}}
@@ -420,7 +422,7 @@ html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo s
 <body>
 <div id="loading">
   <!-- Same layout as the Home screen (invisible stand-ins for its buttons) so the logo sits exactly where Home shows it. -->
-  <div class="homebody"><div class="homemid"><div class="logo big"><img class="logoart" alt="Opposito Zones" draggable="false" src="assets/art/ui/logo.webp?v=0.2.53"></div>
+  <div class="homebody"><div class="homemid"><div class="logo big"><img class="logoart" alt="Opposito Zones" draggable="false" src="assets/art/ui/logo.webp?v=0.2.54"></div>
     <div class="menu lmenu"><div class="btn big"></div><div class="btn big"></div><div class="btn big"></div>
       <div class="lwrap">
         <div class="ltrack"><div id="lbar"></div></div>
@@ -430,12 +432,12 @@ html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo s
     <div class="footrow lfoot"><div class="btn foot"><i class="ico"></i></div><div class="btn foot"><i class="ico"></i></div></div></div>
 </div>
 <div id="game"></div>
-<div id="ui"></div>
+<div id="safeProbe"></div><div id="ui"></div>
 
 <script>
 (function(){
   'use strict';
-  var V = '0.2.53';
+  var V = '0.2.54';
   var FILES = [
     ['lib/phaser-4.2.1.min.js', 1375976],
     ['src/config.js', 5577],
@@ -444,8 +446,8 @@ html.land .logo.big .logoart{width:462px;} /* 40% bigger on wide screens; logo s
     ['src/skins.js', 12745],
     ['src/audio.js', 4299],
     ['src/puzzle.js', 30970],
-    ['src/ui.js', 49759],
-    ['src/game.js', 48324],
+    ['src/ui.js', 49850],
+    ['src/game.js', 48937],
     ['src/main.js', 6881]
   ];
   var SFX = [

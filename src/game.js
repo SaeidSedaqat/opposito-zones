@@ -64,11 +64,15 @@
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
   const BAR_SIDE = 100; // width of the upright booster bar in compact (landscape) layout (bigger icons since 0.2.52)
   const SIDE_COL = 170; // compact layout: room kept on each side of the centred board (pause + label left, booster bar right)
+  // Notch / home-indicator insets (CSS env() read through a hidden probe in index.html).
+  function insets() {
+    const p = document.getElementById('safeProbe'); if (!p) return { t: 0, b: 0 };
+    const cs = getComputedStyle(p); return { t: parseFloat(cs.paddingTop) || 0, b: parseFloat(cs.paddingBottom) || 0 };
+  }
   function computeLayout(w, h) {
     const compact = w >= h * 1.15 && h < 640;
-    // Real rendered height of the booster bar (icons grew in 0.1.108), plus a bottom margin so it never clips.
+    // The booster bar element: its real rendered height decides the room kept for it (portrait).
     const barEl = document.getElementById('gBar');
-    const bar = barEl && barEl.hidden ? 8 : Math.max(84, (barEl && barEl.offsetHeight) || 0) + 16;
     let x, y, size;
     if (compact) {
       // Landscape (phones, short embeds like the CrazyGames player): the board is centred and takes
@@ -78,14 +82,18 @@
       x = (w - size) / 2;
       y = (h - size) / 2;
     } else {
-      // The message starts just under the pause button (its size differs by orientation), and the board under that.
-      const pe = document.getElementById('gPause'), top = 16 + 10 + ((pe && pe.offsetHeight) || 60) + 6, msgH = 56;
-      size = clamp(Math.min(w - 32, h - top - msgH - bar - 24), 160, 620);
+      // Portrait: pause + label sit below the notch (plus 12px), the booster bar sits at the bottom with
+      // the same margin the pause button has at the top, and the board is centred in the room between.
+      const ins = insets(), st = 16 + ins.t + 12, sb = 16 + ins.b;
+      const pe = document.getElementById('gPause'), top = st + 10 + ((pe && pe.offsetHeight) || 60) + 6, msgH = 56;
+      const barH = barEl && barEl.hidden ? 0 : Math.max(84, (barEl && barEl.offsetHeight) || 0);
+      const below = barH ? barH + 10 + sb + 12 : sb; // bar + its bottom margin + the gap above it
+      size = clamp(Math.min(w - 32, h - top - msgH - below - 12), 160, 620);
       x = (w - size) / 2;
-      const blockH = size + 12 + bar;
-      y = top + msgH + Math.max(12, (h - top - msgH - blockH) * 0.3); // sit high: 30% of the spare room above, 70% below
+      y = top + msgH + Math.max(12, (h - below - top - msgH - size) / 2);
+      return { W: w, H: h, x, y, size, compact, safe: { l: 16, t: st, r: 16, b: sb }, barY: barH ? h - sb - 10 - barH : null };
     }
-    return { W: w, H: h, x, y, size, compact, safe: { l: 16, t: 16, r: 16 } };
+    return { W: w, H: h, x, y, size, compact, safe: { l: 16, t: 16, r: 16, b: 16 } };
   }
   // Big screens: lay the game out as if the window were a normal-sized one (w/g x h/g), then scale
   // everything up by g -- the HUD through CSS zoom (--g), the board by multiplying its rect --

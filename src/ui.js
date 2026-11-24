@@ -334,7 +334,7 @@
     } else {
       const bw = Math.min(Math.max(L.size, 280), 440, L.W - 16);
       bar.style.left = (L.x + L.size / 2 - bw / 2) + 'px';
-      bar.style.top = (L.y + L.size + 12) + 'px';
+      bar.style.top = (L.barY != null ? L.barY : L.y + L.size + 12) + 'px'; // bottom of the screen, mirroring the pause button's top margin
       bar.style.width = bw + 'px';
     }
     const gen = game.querySelector('#gGen');
