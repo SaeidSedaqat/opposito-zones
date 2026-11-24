@@ -69,7 +69,7 @@
   function dateLabel(t) { return MONTHS[t.m] + ' ' + t.day + ', ' + t.y; }
 
   OP.config = {
-    VERSION: '0.2.23',
+    VERSION: '0.2.24',
     DIFFS,
     SIZES: [4, 6, 8],
     coins: [0, 10, 20, 30, 50],      // by diff (1..4)
@@ -78,6 +78,7 @@
     tutorialCoins: 10,
     drop: [0, 0, 0, 0.25, 0.4],      // bonus booster chance by diff (Levels only)
     adGives: { hint: 3, check: 2, reveal: 1 },
+    boosterPrice: { hint: 40, check: 50, reveal: 60 }, // coins for the same pack an ad gives
     adCooldown: 180000,
     unlockLevel: 10,                 // Free Play and Daily Play open after this level is beaten
     adSeconds: 3,

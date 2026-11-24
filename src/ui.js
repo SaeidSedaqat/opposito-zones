@@ -155,20 +155,25 @@
     }
   };
   function modesOpen() { return S().level > C.unlockLevel; }
-  function lockedToast(name) { OP.audio.play('close', 0.6); toast('Finish Level ' + C.unlockLevel + ' to unlock ' + name); }
+  function lockedToast(name, btn) { OP.audio.play('close', 0.6); toast('Finish Level ' + C.unlockLevel + ' to unlock ' + name, btn); }
   // Shown once, after beating Level C.unlockLevel.
   function openUnlocked(cb) {
     const m = modal('<div class="panel small unlocked"><h2>New modes unlocked!</h2>' +
-      '<div class="umodes"><span class="um green">' + ic('play-white') + 'Free Play</span><span class="um daily">' + ic('play-white') + 'Daily Play</span></div>' +
+      '<div class="umodes"><button class="um green" id="uFree">' + ic('play-white') + 'Free Play</button><button class="um daily" id="uDaily">' + ic('play-white') + 'Daily Play</button></div>' +
       '<p>Play any size and difficulty, or try today&rsquo;s puzzle.</p><button class="btn primary" id="uOk">Great!</button></div>', { dismiss: false });
     OP.audio.play('reward');
     m.querySelector('#uOk').onclick = () => m.close(cb);
+    // The two modes go to Home and press its button: Free Play opens the picker, Daily Play starts
+    // today's puzzle (or says it is already solved).
+    const go = (id) => () => m.close(() => { show('home'); home.querySelector(id).click(); });
+    m.querySelector('#uFree').onclick = go('#hFree');
+    m.querySelector('#uDaily').onclick = go('#hDaily');
   }
   home.querySelector('#hSet').onclick = () => openSettings();
   home.querySelector('#hShop').onclick = () => openShop();
   home.querySelector('#hLevels').onclick = () => OP.game.start('levels');
-  home.querySelector('#hFree').onclick = () => (modesOpen() ? openFree() : lockedToast('Free Play'));
-  home.querySelector('#hDaily').onclick = () => { if (!modesOpen()) return lockedToast('Daily Play'); const s = dailyState().solved; if (s) dailyDone(s); else OP.game.start('daily'); };
+  home.querySelector('#hFree').onclick = () => (modesOpen() ? openFree() : lockedToast('Free Play', home.querySelector('#hFree')));
+  home.querySelector('#hDaily').onclick = () => { if (!modesOpen()) return lockedToast('Daily Play', home.querySelector('#hDaily')); const s = dailyState().solved; if (s) dailyDone(s); else OP.game.start('daily'); };
   function dailyDone(s) {
     modal('<div class="panel small daydone"><h2>Daily Play solved!</h2><div class="stats"><div><span>Time</span><b>' + fmtTime(s.time) + '</b></div></div>' +
       '<p>Come back tomorrow for a new puzzle.</p><button class="btn primary" data-x="close">OK</button></div>');
@@ -205,7 +210,7 @@
   const shop = screen('shop',
     '<div class="topbar tall"><button class="circ" id="sBack" aria-label="Back">' + ic('back') + '</button>' +
     '<h1 class="title">Shop</h1><span class="coins" id="sCoins"></span></div>' +
-    '<div class="shopbody"><div class="cards" id="sCards"></div></div>');
+    '<div class="shopbody"><div class="bshop" id="sBoost"></div><div class="cardwrap"><div class="cards" id="sCards"></div></div></div>');
 
   // Shop preview: the skin's two pieces side by side, big enough to see clearly.
   function miniBoard(sk) {
@@ -224,6 +229,13 @@
   }
   renderers.shop = function () {
     shop.querySelector('#sCoins').innerHTML = ic('coin') + '<b>' + S().coins + '</b>';
+    // Boosters for coins: the same packs a rewarded ad gives (3 hints, 2 checks, 1 reveal).
+    shop.querySelector('#sBoost').innerHTML = ['hint', 'check', 'reveal'].map((k) => {
+      const amt = C.adGives[k];
+      return '<button class="bitem' + (S().coins < C.boosterPrice[k] ? ' poor' : '') + '" data-k="' + k + '">' +
+        (k === 'hint' ? ic('hint') : gridIc(k)) + '<em>' + (S().boosters[k] || 0) + '</em>' +
+        '<span class="bn">+' + amt + ' ' + boosterName(k, amt) + '</span><span class="st">' + ic('coin') + C.boosterPrice[k] + '</span></button>';
+    }).join('');
     shop.querySelector('#sCards').innerHTML = OP.skins.list.map((sk) => {
       const st = skinState(sk);
       return '<button class="card ' + st.k + '" data-id="' + sk.id + '">' + miniBoard(sk) +
@@ -234,6 +246,7 @@
   let shopBack = null;
   function openShop(back) { shopBack = back || null; show('shop'); }
   shop.querySelector('#sBack').onclick = () => { const b = shopBack; shopBack = null; if (b) b(); else show('home'); };
+  shop.querySelector('#sBoost').onclick = (e) => { const b = e.target.closest('.bitem'); if (b && buyBooster(b.dataset.k)) renderers.shop(); };
   shop.querySelector('#sCards').onclick = (e) => { const b = e.target.closest('.card'); if (b) cardTap(OP.skins.get(b.dataset.id)); };
   function cardTap(sk) {
     const st = skinState(sk);
@@ -305,10 +318,18 @@
       lab.style.cssText = 'left:50%;top:' + (sx.t + 8) + 'px;transform:translateX(-50%);width:' + Math.max(120, L.W - 2 * 96) + 'px';
       msgEl.style.cssText = 'left:50%;top:' + (sx.t + 10 + (pause.offsetHeight || 60) + 6) + 'px;transform:translateX(-50%);width:' + Math.min(L.W - 24, 560) + 'px';
     }
-    const bw = Math.min(Math.max(L.size, 280), 440, L.W - 16);
-    bar.style.left = (L.x + L.size / 2 - bw / 2) + 'px';
-    bar.style.top = (L.y + L.size + 12) + 'px';
-    bar.style.width = bw + 'px';
+    bar.classList.toggle('vert', !!L.compact);
+    if (L.compact) {
+      // Landscape: the bar stands upright to the left of the board, centred on it.
+      bar.style.width = '';
+      bar.style.left = (L.x - 12 - bar.offsetWidth) + 'px';
+      bar.style.top = (L.y + L.size / 2 - bar.offsetHeight / 2) + 'px';
+    } else {
+      const bw = Math.min(Math.max(L.size, 280), 440, L.W - 16);
+      bar.style.left = (L.x + L.size / 2 - bw / 2) + 'px';
+      bar.style.top = (L.y + L.size + 12) + 'px';
+      bar.style.width = bw + 'px';
+    }
     const gen = game.querySelector('#gGen');
     gen.style.left = L.x + 'px'; gen.style.top = L.y + 'px'; gen.style.width = L.size + 'px'; gen.style.height = L.size + 'px';
   }
@@ -388,6 +409,7 @@
     const pnl = m.querySelector('.panel');
     if (pnl && window.MutationObserver) new MutationObserver(() => fitPanel(m)).observe(pnl, { childList: true, subtree: true, characterData: true });
     if (!opts.silent) OP.audio.play('open', 0.7);
+    m.dismissable = opts.dismiss !== false;
     m.close = function (cb) {
       if (m.closing) return;
       m.closing = true;
@@ -552,13 +574,30 @@
 
   // Booster refill: only the booster that ran out. One rewarded ad grants 3 hints, 2 checks or 1 reveal.
   // The icon is the one from the game's booster bar, twice its size. Close with the red X.
+  function boosterName(k, amt) { const n = { hint: 'hint', check: 'check', reveal: 'reveal' }[k] || k; return amt === 1 ? n : n + 's'; }
+  // Buys one pack of a booster for coins. Returns false (and says so) when coins are short.
+  function buyBooster(k) {
+    const price = C.boosterPrice[k], amt = C.adGives[k];
+    if (S().coins < price) { toast('Not enough coins yet'); OP.audio.play('wrong', 0.5); return false; }
+    S().coins -= price;
+    S().boosters[k] = (S().boosters[k] || 0) + amt;
+    OP.save.persist();
+    OP.audio.play('coin');
+    toast('+' + amt + ' ' + boosterName(k, amt));
+    return true;
+  }
   function boosterAd(pre, allowReveal, done) {
     const G = C.adGives, name = { hint: 'hints', check: 'checks', reveal: 'reveals' }[pre] || pre + 's';
     const amt = G[pre], label = amt === 1 ? name.replace(/s$/, '') : name;
     const icon = pre === 'hint' ? ic('hint') : gridIc(pre);
     const m = modal('<div class="panel boostad">' + XBTN + '<h2>Out of ' + name + '</h2>' +
       '<div class="bgift">' + icon + '<b>+' + amt + ' ' + label + '</b></div>' +
-      '<button class="btn primary watch" id="bWatch">' + ic('ad-white') + '<span>Watch Ad</span></button></div>');
+      '<div class="bbtns"><button class="btn primary watch" id="bWatch">' + ic('ad-white') + '<span>Watch Ad</span></button>' +
+      '<button class="btn gold watch" id="bBuy">' + ic('coin') + '<span>' + C.boosterPrice[pre] + '</span></button></div></div>');
+    m.querySelector('#bBuy').onclick = () => {
+      if (!buyBooster(pre)) return;
+      m.close(() => { if (done) done(); });
+    };
     m.querySelector('#bWatch').onclick = () => m.close(() => rewardedAd(() => {
       S().boosters[pre] += amt;
       OP.save.persist();
@@ -693,9 +732,12 @@
 
   // ---------- toast ----------
   let toastEl = null, toastT = null;
-  function toast(text) {
+  // at: an element to show it just under (instead of near the bottom of the screen).
+  function toast(text, at) {
     if (!toastEl) { toastEl = h('<div class="toast"></div>'); document.body.appendChild(toastEl); }
     toastEl.innerHTML = esc(text);
+    if (at) { const r = at.getBoundingClientRect(); toastEl.style.top = Math.round(r.bottom + 6) + 'px'; toastEl.style.bottom = 'auto'; }
+    else { toastEl.style.top = ''; toastEl.style.bottom = ''; }
     toastEl.classList.remove('on'); void toastEl.offsetWidth; toastEl.classList.add('on');
     clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), 1800);
   }
@@ -706,6 +748,17 @@
     if (b && !b.disabled && !b.closest('[data-x]') && b.dataset.x == null && !b.classList.contains('boost') && !b.classList.contains('card')) OP.audio.play('click', 0.8);
   }, true);
   document.addEventListener('dblclick', (e) => e.preventDefault());
+  // Escape (desktop): closes the top popup if it can be closed; otherwise pauses the game.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || adOn) return;
+    const top = stack[stack.length - 1];
+    if (top) {
+      if (top.dismissable && !top.closing) { OP.audio.play('close', 0.7); top.close(); }
+    } else if (current === 'game' && OP.game) OP.game.pause();
+    else if (current === 'shop') shop.querySelector('#sBack').click();
+    else return;
+    e.preventDefault();
+  });
 
   OP.ui = {
     show, refresh, get current() { return current; },

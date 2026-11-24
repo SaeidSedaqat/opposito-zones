@@ -61,6 +61,7 @@
 
   // ---------- layout ----------
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  const BAR_SIDE = 84; // width of the upright booster bar in compact (landscape) layout
   function computeLayout(w, h) {
     const compact = w >= h * 1.15 && h < 640;
     // Real rendered height of the booster bar (icons grew in 0.1.108), plus a bottom margin so it never clips.
@@ -68,9 +69,11 @@
     const bar = barEl && barEl.hidden ? 8 : Math.max(84, (barEl && barEl.offsetHeight) || 0) + 16;
     let x, y, size;
     if (compact) {
-      size = clamp(h - 24 - bar - 12, 160, Math.min(h - 40, w * 0.62));
-      x = w - size - 20;
-      y = Math.max(12, (h - size - 12 - bar) / 2);
+      // Landscape phones: the board takes nearly the full height on the right, the booster bar
+      // stands upright beside it, and the pause button, label and messages use the left side.
+      size = clamp(h - 24, 160, Math.min(w - 20 - BAR_SIDE - 12 - 200, w * 0.62));
+      x = w - size - 16;
+      y = (h - size) / 2;
     } else {
       // The message starts just under the pause button (its size differs by orientation), and the board under that.
       const pe = document.getElementById('gPause'), top = 16 + 10 + ((pe && pe.offsetHeight) || 60) + 6, msgH = 56;
@@ -530,6 +533,13 @@
     dailyTimerId = setInterval(dailyTick, 250);
   }
   function stopDailyTimer() { if (dailyTimerId) { clearInterval(dailyTimerId); dailyTimerId = null; } }
+  // The Daily time is the player's score: it only runs while the Daily board is actually in view.
+  // Leaving the tab/app stops it; coming back starts it again unless a popup or an ad is up.
+  document.addEventListener('visibilitychange', () => {
+    if (mode !== 'daily') return;
+    if (document.hidden) { if (dailyTimerId && pz && !solved) dailyTick(); stopDailyTimer(); }
+    else if (pz && !solved && !adPaused && OP.ui.current === 'game' && !OP.ui.modalOpen()) startDailyTimer();
+  });
 
   // ---------- pause / restart / screens ----------
   function restartCurrent() {
@@ -562,7 +572,7 @@
       scene.sys.game.canvas.style.display = name === 'game' ? '' : 'none';
       if (name === 'game') {
         const g = document.getElementById('game'); requestAnimationFrame(() => { g.style.opacity = '1'; });
-        if (scene.L && pz) scene.updatePieces(); // a skin may have been equipped in the shop
+        if (scene.L && pz) { scene.updatePieces(); updateBoosterUI(); } // a skin or boosters may have been bought in the shop
       }
     }
   }
