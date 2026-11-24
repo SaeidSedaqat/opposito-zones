@@ -48,11 +48,12 @@
     catch (e) { workerOk = false; finish(null); }
   }
   const cache = {};
+  const NEUTRAL = ['stone', 'silver'].map((k) => OP.Puzzle.PALETTE_NAMES.indexOf(k)); // greyish colours kept off tutorial zones
   function prefetch(spec) { if (spec.fixed || cache[spec.seed]) return; genPuzzle(spec, (p) => { if (p) cache[spec.seed] = p; }); }
   function obtain(spec, cb) {
     if (spec.fixed) {
       const p = Object.assign({ diff: spec.diff, rating: 1, seed: spec.seed }, JSON.parse(JSON.stringify(spec.fixed)));
-      p.colors = OP.Puzzle.colourZones(p.n, p.zones, OP.Puzzle.mulberry32(OP.Puzzle.hashStr(spec.seed)));
+      p.colors = OP.Puzzle.colourZones(p.n, p.zones, OP.Puzzle.mulberry32(OP.Puzzle.hashStr(spec.seed)), NEUTRAL);
       cb(p); return;
     }
     if (cache[spec.seed]) { const p = cache[spec.seed]; delete cache[spec.seed]; cb(p); return; }

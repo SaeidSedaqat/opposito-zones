@@ -421,7 +421,9 @@
     const L = PALETTE.map(lab);
     return L.map((a) => L.map((b) => a !== b && Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) < 21));
   })();
-  function colourZones(n, zones, rnd) {
+  // avoid: palette indexes not to use (the tutorials skip the greyish stone and silver, which
+  // would look as washed out as the faded zones around the spotlit one).
+  function colourZones(n, zones, rnd, avoid) {
     const NB = neighbours(n), zo = new Int8Array(n * n), Z = zones.length, K = PALETTE.length;
     zones.forEach((z, k) => { for (const i of z) zo[i] = k; });
     const adj = zones.map(() => new Set());
@@ -445,7 +447,7 @@
         const cand = [];
         for (let c = 0; c < K; c++) {
           const d = near(k, c);
-          if (d < minD) continue;
+          if (d < minD || (avoid && avoid.indexOf(c) >= 0)) continue;
           let ok = true;
           if (sim) for (const a of adj[k]) if (col[a] >= 0 && SIMILAR[c][col[a]]) { ok = false; break; }
           if (ok) cand.push([c, d]);
