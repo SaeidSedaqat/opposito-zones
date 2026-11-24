@@ -8,8 +8,10 @@
   // Hand-made boards: 0 = Fire, 1 = Ice, -1 = empty. zones: lists of cell indexes.
   const I = 1, F = 0, E = -1;
   const FIXED = {
-    // Level 1: rows and columns only (zones come in level 2).
-    1: { n: 4, zones: [], givens: [E, F, F, I, F, I, I, F, I, F, F, I, E, I, I, F],
+    // Level 1: teaches rows and columns. Its board is already split into coloured zones (each one
+    // balanced by the solution), so the very first screen shows what makes this game different;
+    // the zone rule itself is taught on level 2.
+    1: { n: 4, zones: [[0, 4], [1, 2, 5, 6], [3, 7], [8, 12], [9, 10, 13, 14], [11, 15]], givens: [E, F, F, I, F, I, I, F, I, F, F, I, E, I, I, F],
       sol: [I, F, F, I, F, I, I, F, I, F, F, I, F, I, I, F] },
     // Level 2: the zone tutorial. Zones: 0 = {0,1}, 1 = {2,3,6,7}, 2 = {4,8,12,13}, 3 = {5,9,10,14}, 4 = {11,15}.
     2: { n: 4, zones: [[0, 1], [2, 3, 6, 7], [4, 8, 12, 13], [5, 9, 10, 14], [11, 15]],
@@ -21,12 +23,12 @@
   // skin's piece names). A step whose piece is B on an empty cell is taught as a double tap.
   const GUIDE1 = [
     { i: 12, v: F, line: 3, say: 'Each row needs as many {A} as {B}.<br>Tap here to place {A}!' },
-    { i: 0, v: I, line: 4, say: 'Columns too! This one needs {B}.<br>Double tap to get {B}.' },
+    { i: 0, v: I, line: 4, say: 'Columns too! This one needs {B}.<br>Double tap for {B}.' },
   ];
   const GUIDE2 = [
-    { i: 0, v: F, zone: 0, say: 'Zones need balance too! These two share a zone, so they are opposites.<br>Tap here to place {A}!' },
-    { i: 3, v: I, zone: 1, say: 'This zone already has 2 {A}, so the rest is {B}.<br>Double tap to get {B}.' },
-    { i: 12, v: I, zone: 2, say: 'This zone has its 2 {A} too.<br>Double tap to get {B}.' },
+    { i: 0, v: F, zone: 0, say: 'Zones need balance too: these two are opposites.<br>Tap here to place {A}!' },
+    { i: 3, v: I, zone: 1, say: 'This zone has its 2 {A}, so the rest is {B}.<br>Double tap for {B}.' },
+    { i: 12, v: I, zone: 2, say: 'This zone has its 2 {A} too.<br>Double tap for {B}.' },
   ];
 
   // Levels and Daily use 4x4 and 6x6 only: on a 390 px wide phone an 8x8 board would have 42 px tiles,
@@ -34,7 +36,7 @@
   // tutorial, 3-5 easy 4x4 zone boards and 6 the first 6x6. From level 2 on every board has zones.
   function levelSpec(L) {
     let s;
-    if (L === 1) s = { n: 4, diff: 1, tut: 1, fixed: FIXED[1], guide: GUIDE1, done: 'Perfect! Every row and column is balanced.' };
+    if (L === 1) s = { n: 4, diff: 1, tut: 1, fixed: FIXED[1], guide: GUIDE1, done: 'Perfect! Next up: the coloured zones.' };
     else if (L === 2) s = { n: 4, diff: 1, tut: 2, fixed: FIXED[2], guide: GUIDE2, done: 'Perfect! Every zone is balanced too.' };
     else if (L <= 5) s = { n: 4, diff: 1, extra: [2, 1, 0][L - 3] };
     else if (L <= 10) s = { n: 6, diff: 1, extra: [6, 5, 4, 3, 2][L - 6] }; // first 6x6 boards start with extra givens, easing off each level
@@ -69,7 +71,7 @@
   function dateLabel(t) { return MONTHS[t.m] + ' ' + t.day + ', ' + t.y; }
 
   OP.config = {
-    VERSION: '0.2.41',
+    VERSION: '0.2.51',
     DIFFS,
     SIZES: [4, 6, 8],
     coins: [0, 10, 20, 30, 50],      // by diff (1..4)

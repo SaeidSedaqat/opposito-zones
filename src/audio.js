@@ -11,6 +11,8 @@
   const BASE = { click: 0.55 };
 
   function settings() { return OP.save.d.settings; }
+  // CrazyGames' mute setting overrides the in-game toggles; ads (ducked) silence everything.
+  function cgMuted() { return !!(OP.cg && OP.cg.muted()); }
 
   function initCtx() {
     if (ctx) return;
@@ -42,7 +44,7 @@
   ['pointerdown', 'keydown', 'touchend'].forEach((ev) => window.addEventListener(ev, unlock, { capture: true, passive: true }));
 
   function play(name, vol, rate) {
-    if (!settings().sound || !ctx || !buf[name]) return;
+    if (!settings().sound || ducked || cgMuted() || !ctx || !buf[name]) return;
     const now = performance.now();
     if (last[name] && now - last[name] < 35) return;
     last[name] = now;
@@ -66,7 +68,7 @@
   }
   function syncMusic() {
     if (!unlocked || !ctx) return;
-    const want = settings().music && !ducked && !document.hidden;
+    const want = settings().music && !ducked && !cgMuted() && !document.hidden;
     if (want) {
       if (!mBuf) { loadMusic(); return; }
       if (mSrc) return;
@@ -84,6 +86,8 @@
     if (ctx) { if (document.hidden) ctx.suspend().catch(() => {}); else ctx.resume().catch(() => {}); }
     syncMusic();
   });
+
+  if (OP.cg) OP.cg.onSettings(() => syncMusic());
 
   OP.audio = {
     play,

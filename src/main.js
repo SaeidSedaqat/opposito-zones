@@ -42,7 +42,10 @@
   // Review links (dev only): ?dev=1&level=30 opens that level's board, ?dev=1&n=6&diff=3&seed=abc any
   // seeded board. Both play as Free Play, so level progress is untouched.
   const q = new URLSearchParams(location.search);
-  if (q.get('dev') === '1' && (q.get('level') || q.get('seed'))) {
+  // Dev tools exist only on localhost and the GitHub Pages test site -- never on CrazyGames or any other host.
+  const devHost = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || /\.github\.io$/i.test(location.hostname);
+  const dev = devHost && q.get('dev') === '1';
+  if (dev && (q.get('level') || q.get('seed'))) {
     const L = parseInt(q.get('level'), 10);
     const spec = L > 0 ? OP.config.levelSpec(L) : { n: [4, 6, 8].indexOf(+q.get('n')) >= 0 ? +q.get('n') : 6, diff: Math.min(4, Math.max(1, parseInt(q.get('diff'), 10) || 2)), seed: q.get('seed') };
     OP.game.start('free', { spec, quick: true });
@@ -50,7 +53,7 @@
   else OP.ui.show('home'); // this alone triggers OP.game.onScreen('home'), which shows the login reward if due
 
   // ---------- dev mode: ?dev=1 ----------
-  if (new URLSearchParams(location.search).get('dev') === '1') setupDevPanel();
+  if (dev) setupDevPanel();
   function setupDevPanel() {
     const p = document.createElement('div');
     p.id = 'devPanel';

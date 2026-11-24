@@ -61,9 +61,13 @@
     else b.classList.remove("skinbg");
   }
 
+  // CrazyGames gameplay start/stop: "playing" means the board is on screen, unsolved, with no popup or ad over it.
+  function syncPlay() {
+    if (OP.cg) OP.cg.setPlaying(current === 'game' && stack.length === 0 && !adOn && !!(OP.game && OP.game.isPlaying && OP.game.isPlaying()));
+  }
   function show(name) {
     applySkinBg();
-    if (current === name) { refresh(name); screens[name].classList.add('on'); if (name === 'game' && OP.game) OP.game.onScreen(name); return; }
+    if (current === name) { refresh(name); screens[name].classList.add('on'); if (name === 'game' && OP.game) OP.game.onScreen(name); syncPlay(); return; }
     const prev = current ? screens[current] : null;
     current = name;
     const el = screens[name];
@@ -78,6 +82,7 @@
       void el.offsetWidth;
       el.classList.add('on');
       if (OP.game) OP.game.onScreen(name);
+      syncPlay();
     };
     if (name === 'game') go(); else whenDecoded(el, go);
   }
@@ -268,6 +273,7 @@
     '<button class="circ" id="gPause" aria-label="Pause">' + ic('pause') + '</button>' +
     '<div class="glabel" id="gLabel"><b id="gL1"></b><span id="gL2"></span></div>' +
     '<div class="gtimer" id="gTimer" hidden>0:00</div>' +
+    '<button class="gskip" id="gSkip" hidden>Skip</button>' +
     '<div class="gmsg" id="gMsg"></div>' +
     '<div class="bar" id="gBar">' +
     '<button class="boost" data-b="undo" aria-label="Undo">' + ic('undo') + '</button>' +
@@ -281,6 +287,7 @@
     '<img alt="" draggable="false" src="assets/art/ui/hand.webp?v=' + OP.config.VERSION + '"></div>');
 
   game.querySelector('#gPause').onclick = () => OP.game.pause();
+  game.querySelector('#gSkip').onclick = () => OP.game.skipTutorial();
   game.querySelector('#gBar').onclick = (e) => { const b = e.target.closest('.boost'); if (b && !b.hidden) OP.game.booster(b.dataset.b); };
 
   const msgEl = game.querySelector('#gMsg');
@@ -304,9 +311,12 @@
     const sx = L.safe;
     pause.style.left = sx.l + 12 + 'px'; pause.style.top = sx.t + 10 + 'px';
     tim.style.right = sx.r + 12 + 'px'; tim.style.left = 'auto'; tim.style.top = sx.t + 14 + 'px';
+    const skip = game.querySelector('#gSkip');
+    skip.style.right = sx.r + 12 + 'px'; skip.style.left = 'auto'; skip.style.top = sx.t + 16 + 'px';
     if (L.compact) {
       // The board fills the right side here, so the timer sits beside the pause button instead.
       tim.style.left = sx.l + 12 + 75 + 12 + 'px'; tim.style.right = 'auto'; tim.style.top = sx.t + 30 + 'px';
+      skip.style.left = sx.l + 12 + 75 + 12 + 'px'; skip.style.right = 'auto'; skip.style.top = sx.t + 30 + 'px'; // beside the pause button, where the Daily timer goes
       const colW = Math.max(120, L.x - sx.l - 24);
       lab.style.cssText = 'left:' + (sx.l + 12) + 'px;top:' + (sx.t + 94) + 'px;width:' + colW + 'px;transform:none;text-align:left;align-items:flex-start';
       msgEl.style.cssText = 'left:' + (sx.l + 12) + 'px;top:' + (sx.t + 166) + 'px;width:' + colW + 'px;transform:none;justify-content:flex-start;text-align:left;height:auto;min-height:40px';
@@ -334,6 +344,7 @@
     if (o.l1 != null) game.querySelector('#gL1').textContent = o.l1;
     if (o.l2 != null) game.querySelector('#gL2').textContent = o.l2;
     if (o.timer != null) game.querySelector('#gTimer').hidden = !o.timer;
+    if (o.skip != null) game.querySelector('#gSkip').hidden = !o.skip;
     if (o.bar != null) game.querySelector('#gBar').hidden = !o.bar;
     if (o.gen != null) game.querySelector('#gGen').hidden = !o.gen;
   }
@@ -399,6 +410,7 @@
     const m = h('<div class="modal"><div class="scrim"></div>' + html + '</div>');
     root.appendChild(m);
     stack.push(m);
+    syncPlay();
     void m.offsetWidth;
     fitPanel(m);
     whenDecoded(m, () => { if (!m.closing) m.classList.add('on'); }); // fade in once its art is ready
@@ -411,6 +423,7 @@
       m.closing = true;
       m.classList.remove('on');
       const i = stack.indexOf(m); if (i >= 0) stack.splice(i, 1);
+      setTimeout(syncPlay, 0); // after any follow-up popup this close opens synchronously
       setTimeout(() => { m.remove(); if (cb) cb(); }, 200);
       if (opts.onClose) opts.onClose();
     };
@@ -608,7 +621,8 @@
   function runAd(label, cb) {
     if (adOn) return;
     adOn = true;
-    OP.audio.duck(true);
+    syncPlay();
+    OP.audio.duck(true); // no music and no sounds while the ad runs; the overlay takes every tap
     if (OP.game) OP.game.adPause(true);
     const ov = h('<div class="adov"><div class="adbox"><div class="adtag">AD</div><div class="adtxt"></div></div></div>');
     document.body.appendChild(ov);
@@ -620,7 +634,7 @@
       if (n === 0) {
         S().lastAdAt = Date.now(); OP.save.persist();
         ov.classList.remove('on');
-        setTimeout(() => { ov.remove(); adOn = false; OP.audio.duck(false); if (OP.game) OP.game.adPause(false); if (cb) cb(); }, 220);
+        setTimeout(() => { ov.remove(); adOn = false; OP.audio.duck(false); if (OP.game) OP.game.adPause(false); if (cb) cb(); syncPlay(); }, 220);
         return;
       }
       n--; setTimeout(step, 1000);
@@ -744,15 +758,14 @@
     if (b && !b.disabled && !b.closest('[data-x]') && b.dataset.x == null && !b.classList.contains('boost') && !b.classList.contains('card')) OP.audio.play('click', 0.8);
   }, true);
   document.addEventListener('dblclick', (e) => e.preventDefault());
-  // Escape (desktop): closes the top popup if it can be closed; otherwise pauses the game.
+  // Escape (desktop): only closes the top popup if it can be closed. It never pauses -- browsers use
+  // Escape to leave fullscreen, so it must not double as a game control (CrazyGames guideline).
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || adOn) return;
     const top = stack[stack.length - 1];
     if (top) {
       if (top.dismissable && !top.closing) { OP.audio.play('close', 0.7); top.close(); }
-    } else if (current === 'game' && OP.game) OP.game.pause();
-    else if (current === 'shop') shop.querySelector('#sBack').click();
-    else return;
+    } else return;
     e.preventDefault();
   });
 
@@ -760,6 +773,6 @@
     show, refresh, get current() { return current; },
     msg, placeHud, setHud, setTimer, setBoosters, pointer, setLineNums,
     modal, modalOpen, openSettings, openPause, openShop, openHelp, openWin, maybeLogin, boosterAd,
-    rewardedAd, adBreak, playLoading, toast, openUnlocked, fmtTime, dailyState, logoHtml, esc,
+    rewardedAd, adBreak, syncPlay, playLoading, toast, openUnlocked, fmtTime, dailyState, logoHtml, esc,
   };
 })();

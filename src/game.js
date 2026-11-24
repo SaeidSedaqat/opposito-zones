@@ -130,21 +130,22 @@
     const sk = skin(); const nameOf = (v) => (v === 0 ? sk.an : sk.bn);
     const place = 'Place ' + nameOf(step.v) + ' here';
     const grp = 'this ' + (step.gt || 'line');
+    const P = nameOf(step.p), V = nameOf(step.v);
     switch (step.kind) {
-      case 'pair': return 'Two ' + nameOf(step.p) + ' side by side already. ' + place + ', or three would match.';
-      case 'sand': return nameOf(step.p) + ' on both sides of the gap. ' + place + ' to fill it in.';
-      case 'count': return 'This ' + step.gt + ' already has ' + step.k + ' ' + nameOf(step.p) + ', so the rest are ' + nameOf(step.v) + '.';
-      case 'zone2': return 'These two share a zone, so they are opposites. ' + place + '.';
-      case 'zonefull': return 'This zone already has ' + step.k + ' ' + nameOf(step.p) + ', so the rest are ' + nameOf(step.v) + '.';
+      case 'pair': return 'Two ' + P + ' side by side, so ' + V + ' here.';
+      case 'sand': return P + ' on both sides, so ' + V + ' in the gap.';
+      case 'count': return 'This ' + step.gt + ' has its ' + step.k + ' ' + P + ', so the rest are ' + V + '.';
+      case 'zone2': return 'Same zone means opposites: ' + V + ' here.';
+      case 'zonefull': return 'This zone has its ' + step.k + ' ' + P + ', so the rest are ' + V + '.';
       case 'meet': return step.sub === 1
-        ? 'The zone must put ' + step.k + ' ' + nameOf(step.p) + ' in ' + grp + ', and that is all the ' + nameOf(step.p) + ' ' + grp + ' still needs. ' + place + '.'
-        : 'This ' + step.gt + ' must put ' + step.k + ' ' + nameOf(step.p) + ' in the zone, and that is all the ' + nameOf(step.p) + ' the zone still needs. ' + place + '.';
-      case 'line': return 'Every way to finish ' + grp + ' puts ' + nameOf(step.v) + ' here.';
+        ? 'The zone gives ' + grp + ' all its ' + P + ', so ' + V + ' here.'
+        : 'This ' + step.gt + ' gives the zone all its ' + P + ', so ' + V + ' here.';
+      case 'line': return 'Only ' + V + ' works here in ' + grp + '.';
       case 'trial': {
         const w = nameOf(step.wrong);
-        if (step.why === 'three') return w + ' here would end in three ' + nameOf(step.p) + ' side by side in ' + grp + '. ' + place + '.';
-        if (step.why === 'over') return w + ' here would leave ' + grp + ' without enough ' + nameOf(1 - step.p) + '. ' + place + '.';
-        return w + ' here would leave no way to finish ' + grp + '. ' + place + '.';
+        if (step.why === 'three') return w + ' here makes three ' + P + ' in a row, so ' + V + '.';
+        if (step.why === 'over') return w + ' here leaves ' + grp + ' short of ' + nameOf(1 - step.p) + ', so ' + V + '.';
+        return w + ' here breaks ' + grp + ', so ' + V + '.';
       }
       default: return place + '.';
     }
@@ -251,7 +252,7 @@
     // Levels 1-2 have no boosters at all (not even Undo); the board grows into the freed space.
     const noBar = which === 'levels' && spec.level <= 2;
     const pz1 = document.getElementById('gPause'); if (pz1) pz1.hidden = which === 'levels' && spec.level === 1; // no pause in the tutorial
-    OP.ui.setHud({ l1: labels[0], l2: labels[1], timer: which === 'daily', bar: !noBar, gen: false });
+    OP.ui.setHud({ l1: labels[0], l2: labels[1], timer: which === 'daily', bar: !noBar, gen: false, skip: which === 'levels' && !!spec.tut });
     if (curL) layout(curL.W, curL.H);
     if (which === 'daily') { OP.ui.setTimer(elapsed); startDailyTimer(); } else stopDailyTimer();
 
@@ -259,6 +260,7 @@
     if (scene) { if (curL) scene.setLayout(curL); else scene.redraw(); }
     updateBoosterUI();
     saveCur();
+    OP.ui.syncPlay();
 
     OP.ui.msg('');
     showGuide();
@@ -310,6 +312,7 @@
     const v = OP.Puzzle.violations(pz, board);
     if (!v.any) {
       solved = true; armed = null; // lock the board: taps during the win celebration must not change it
+      OP.ui.syncPlay();
       if (mode === 'daily') stopDailyTimer(); // freeze the clock at the exact solve moment
       OP.audio.play('win');
       if (scene) scene.winRipple();
@@ -329,6 +332,16 @@
       }, 500);
     }
   }
+  // Skip (Levels 1-2 only): straight to Level 3, the first normal board. The rules stay in Help.
+  function skipTutorial() {
+    if (mode !== 'levels' || !curSpec || !curSpec.tut || solved || OP.ui.modalOpen()) return;
+    clearHint(true); fx.focus = null; OP.ui.pointer(null); OP.ui.msg('');
+    S().level = Math.max(S().level, 3);
+    curObj().levels = null;
+    OP.save.persist();
+    start('levels');
+  }
+  function isPlaying() { return !!(mode && pz && !solved); }
   function win() { if (mode === 'levels') winLevel(); else if (mode === 'free') winFree(); else if (mode === 'daily') winDaily(); }
 
   function winLevel() {
@@ -347,6 +360,7 @@
     prefetch(C.levelSpec(S().level));
     // Beating Level C.unlockLevel opens Free Play and Daily Play: say so before moving on.
     const then = (f) => (spec.level === C.unlockLevel ? () => OP.ui.openUnlocked(f) : f);
+    if (spec.level === C.unlockLevel && OP.cg) OP.cg.happytime(); // new modes unlocked: a rare, real milestone
     OP.ui.openWin({ mode: 'levels', coins, bonus, next: then(() => (S().level >= 4 ? OP.ui.adBreak(() => start('levels')) : start('levels'))), home: then(() => OP.ui.show('home')) });
   }
   function winFree() {
@@ -362,6 +376,7 @@
     d.streak = d.last === y ? d.streak + 1 : 1;
     d.last = t.key;
     d.solved = { date: t.key, time: Math.round(elapsed) };
+    if (OP.cg) OP.cg.happytime(); // the day's puzzle, once a day
     d.dates.push(t.key);
     curObj().daily = null;
     OP.save.persist();
@@ -886,5 +901,5 @@
     }
   }
 
-  OP.game = { start, sizeFits, tilePx, pause, booster, hoverLine, revealLine, onScreen, refreshMarks, clearCache, adPause, layout, dprFor, Scene: BoardScene, devSolve, devInfo };
+  OP.game = { start, skipTutorial, isPlaying, sizeFits, tilePx, pause, booster, hoverLine, revealLine, onScreen, refreshMarks, clearCache, adPause, layout, dprFor, Scene: BoardScene, devSolve, devInfo };
 })();
