@@ -326,9 +326,9 @@
     }
     bar.classList.toggle('vert', !!L.compact);
     if (L.compact) {
-      // Landscape: the bar stands upright to the left of the board, centred on it.
+      // Landscape: the bar stands upright to the right of the board, centred on it.
       bar.style.width = '';
-      bar.style.left = (L.x - 12 - bar.offsetWidth) + 'px';
+      bar.style.left = (L.x + L.size + 16) + 'px';
       bar.style.top = (L.y + L.size / 2 - bar.offsetHeight / 2) + 'px';
     } else {
       const bw = Math.min(Math.max(L.size, 280), 440, L.W - 16);

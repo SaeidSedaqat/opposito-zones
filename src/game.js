@@ -62,7 +62,8 @@
 
   // ---------- layout ----------
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-  const BAR_SIDE = 84; // width of the upright booster bar in compact (landscape) layout
+  const BAR_SIDE = 100; // width of the upright booster bar in compact (landscape) layout (bigger icons since 0.2.52)
+  const SIDE_COL = 170; // compact layout: room kept on each side of the centred board (pause + label left, booster bar right)
   function computeLayout(w, h) {
     const compact = w >= h * 1.15 && h < 640;
     // Real rendered height of the booster bar (icons grew in 0.1.108), plus a bottom margin so it never clips.
@@ -70,10 +71,11 @@
     const bar = barEl && barEl.hidden ? 8 : Math.max(84, (barEl && barEl.offsetHeight) || 0) + 16;
     let x, y, size;
     if (compact) {
-      // Landscape phones: the board takes nearly the full height on the right, the booster bar
-      // stands upright beside it, and the pause button, label and messages use the left side.
-      size = clamp(h - 24, 160, Math.min(w - 20 - BAR_SIDE - 12 - 200, w * 0.62));
-      x = w - size - 16;
+      // Landscape (phones, short embeds like the CrazyGames player): the board is centred and takes
+      // nearly the full height, the booster bar stands upright on its right, and the pause button,
+      // label and messages use the left side.
+      size = clamp(h - 24, 160, Math.min(w - 2 * Math.max(SIDE_COL, BAR_SIDE + 28), w * 0.62));
+      x = (w - size) / 2;
       y = (h - size) / 2;
     } else {
       // The message starts just under the pause button (its size differs by orientation), and the board under that.
