@@ -38,7 +38,7 @@
     mHome: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.7 3.1a1 1 0 0 0-1.4 0l-8.6 8a1 1 0 0 0 .7 1.7H5v7.4a1.3 1.3 0 0 0 1.3 1.3h3.6v-5.4a1 1 0 0 1 1-1h2.2a1 1 0 0 1 1 1v5.4h3.6a1.3 1.3 0 0 0 1.3-1.3v-7.4h1.6a1 1 0 0 0 .7-1.7z"/></svg>',
   };
   // Button icons: generated WebP art (assets/art/ui); the SVGs above are only a fallback for keys without art.
-  const ART = ['gear', 'gear-white', 'bag', 'bag-white', 'back', 'pause', 'undo', 'hint', 'check', 'reveal', 'home', 'play', 'lock', 'ad', 'tick', 'cross', 'help', 'coin', 'play-white', 'ad-white'];
+  const ART = ['gear', 'gear-white', 'bag', 'cart-white', 'back', 'pause', 'undo', 'hint', 'check', 'reveal', 'home', 'play', 'lock', 'ad', 'tick', 'cross', 'help', 'coin', 'play-white', 'ad-white'];
   const ic = (k) => '<i class="ico">' + (ART.indexOf(k) >= 0 ? '<img alt="" draggable="false" src="assets/art/ui/' + k + '.webp?v=' + OP.config.VERSION + '">' : ICON[k]) + '</i>';
   // Check / Reveal icons: their art over a little 3x3 grid that shows what they act on --
   // Check lights up one cell, Reveal a whole row.
@@ -59,7 +59,15 @@
   let current = null;
 
   // ---------- screens ----------
+  // Each skin tints the page background: its two "page" colours are blended over bg.webp (CSS body.skinbg), Fire & Ice keeps the plain art.
+  function applySkinBg() {
+    const sk = OP.skins.get(S().skin), b = document.body;
+    if (sk.page) { b.style.setProperty("--skinbg", "linear-gradient(160deg," + sk.page[0] + "," + sk.page[1] + ")"); b.classList.add("skinbg"); }
+    else b.classList.remove("skinbg");
+  }
+
   function show(name) {
+    applySkinBg();
     if (current === name) { refresh(name); screens[name].classList.add('on'); if (name === 'game' && OP.game) OP.game.onScreen(name); return; }
     const prev = current ? screens[current] : null;
     current = name;
@@ -127,7 +135,7 @@
     '</div></div>' +
     '<div class="footrow">' +
     '<button class="btn foot" id="hSet" aria-label="Settings">' + ic('gear-white') + '</button>' +
-    '<button class="btn foot" id="hShop" aria-label="Shop">' + ic('bag-white') + '</button>' +
+    '<button class="btn foot" id="hShop" aria-label="Shop">' + ic('cart-white') + '</button>' +
     '</div></div>');
 
   function logoHtml() {
@@ -228,6 +236,7 @@
     return { k: 'locked', html: '' };
   }
   renderers.shop = function () {
+    applySkinBg();
     shop.querySelector('#sCoins').innerHTML = ic('coin') + '<b>' + S().coins + '</b>';
     // Boosters for coins: the same packs a rewarded ad gives (3 hints, 2 checks, 1 reveal).
     shop.querySelector('#sBoost').innerHTML = ['hint', 'check', 'reveal'].map((k) => {

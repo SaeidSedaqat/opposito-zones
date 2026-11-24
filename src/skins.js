@@ -140,14 +140,14 @@
   // a / b: piece colours (glows, tints). bg: card backdrop.
   const LIST = [
     { id: 'fireice', name: 'Fire & Ice', pa: 'fire', pb: 'ice', an: 'Fire', bn: 'Ice', a: '#FF6A45', b: '#3FA4E8', bg: ['#FFF1EA', '#EAF5FD'], unlock: { type: 'default' } },
-    { id: 'sunmoon', name: 'Sun & Moon', pa: 'sun', pb: 'moon', an: 'Sun', bn: 'Moon', a: '#FFB020', b: '#6C72E0', bg: ['#FFF7E0', '#ECEDFD'], unlock: { type: 'ad' } },
-    { id: 'robotalien', name: 'Robot & Alien', pa: 'robot', pb: 'alien', an: 'Robot', bn: 'Alien', a: '#6A7A92', b: '#4CB84A', bg: ['#EEF1F6', '#EBF8EA'], unlock: { type: 'ad' } },
-    { id: 'pizzaburger', name: 'Pizza & Burger', pa: 'pizza', pb: 'burger', an: 'Pizza', bn: 'Burger', a: '#E04A3A', b: '#B86A2E', bg: ['#FFF0E8', '#FBF0E2'], unlock: { type: 'coins', price: 500 } },
-    { id: 'cactusflower', name: 'Cactus & Flower', pa: 'cactus', pb: 'flower', an: 'Cactus', bn: 'Flower', a: '#2E9C5C', b: '#E85A9C', bg: ['#EAF6EE', '#FDEDF5'], unlock: { type: 'coins', price: 500 } },
-    { id: 'coffeetea', name: 'Coffee & Tea', pa: 'coffee', pb: 'tea', an: 'Coffee', bn: 'Tea', a: '#9A5B36', b: '#2F9C78', bg: ['#F7EEE8', '#E8F6F0'], unlock: { type: 'coins', price: 500 } },
-    { id: 'catdog', name: 'Cat & Dog', pa: 'cat', pb: 'dog', an: 'Cat', bn: 'Dog', a: '#F59E42', b: '#8A5A36', bg: ['#FFF3E5', '#F4EAE1'], unlock: { type: 'login', day: 2 } },
-    { id: 'ninjapirate', name: 'Ninja & Pirate', pa: 'ninja', pb: 'pirate', an: 'Ninja', bn: 'Pirate', a: '#323A4D', b: '#E5484D', bg: ['#ECEEF3', '#FDECEC'], unlock: { type: 'login', day: 4 } },
-    { id: 'swordshield', name: 'Sword & Shield', pa: 'sword', pb: 'shield', an: 'Sword', bn: 'Shield', a: '#7D8DA3', b: '#3D7DD8', bg: ['#EEF1F5', '#EAF1FC'], unlock: { type: 'login', day: 7 } },
+    { id: 'sunmoon', name: 'Sun & Moon', pa: 'sun', pb: 'moon', an: 'Sun', bn: 'Moon', a: '#FFB020', b: '#6C72E0', bg: ['#FFF7E0', '#ECEDFD'], page: ["#FFD27A", "#AEB2F2"], unlock: { type: 'ad' } },
+    { id: 'robotalien', name: 'Robot & Alien', pa: 'robot', pb: 'alien', an: 'Robot', bn: 'Alien', a: '#6A7A92', b: '#4CB84A', bg: ['#EEF1F6', '#EBF8EA'], page: ["#BFCBE0", "#A8E0A0"], unlock: { type: 'ad' } },
+    { id: 'pizzaburger', name: 'Pizza & Burger', pa: 'pizza', pb: 'burger', an: 'Pizza', bn: 'Burger', a: '#E04A3A', b: '#B86A2E', bg: ['#FFF0E8', '#FBF0E2'], page: ["#FFAE96", "#F5CE8E"], unlock: { type: 'coins', price: 500 } },
+    { id: 'cactusflower', name: 'Cactus & Flower', pa: 'cactus', pb: 'flower', an: 'Cactus', bn: 'Flower', a: '#2E9C5C', b: '#E85A9C', bg: ['#EAF6EE', '#FDEDF5'], page: ["#A9E2B9", "#F5AECF"], unlock: { type: 'coins', price: 500 } },
+    { id: 'coffeetea', name: 'Coffee & Tea', pa: 'coffee', pb: 'tea', an: 'Coffee', bn: 'Tea', a: '#9A5B36', b: '#2F9C78', bg: ['#F7EEE8', '#E8F6F0'], page: ["#E0BC9E", "#A6DEC4"], unlock: { type: 'coins', price: 500 } },
+    { id: 'catdog', name: 'Cat & Dog', pa: 'cat', pb: 'dog', an: 'Cat', bn: 'Dog', a: '#F59E42', b: '#8A5A36', bg: ['#FFF3E5', '#F4EAE1'], page: ["#FFC891", "#DCC2A8"], unlock: { type: 'login', day: 2 } },
+    { id: 'ninjapirate', name: 'Ninja & Pirate', pa: 'ninja', pb: 'pirate', an: 'Ninja', bn: 'Pirate', a: '#323A4D', b: '#E5484D', bg: ['#ECEEF3', '#FDECEC'], page: ["#B8BFD3", "#F5ABAB"], unlock: { type: 'login', day: 4 } },
+    { id: 'swordshield', name: 'Sword & Shield', pa: 'sword', pb: 'shield', an: 'Sword', bn: 'Shield', a: '#7D8DA3', b: '#3D7DD8', bg: ['#EEF1F5', '#EAF1FC'], page: ["#C2CDDD", "#A8C4F2"], unlock: { type: 'login', day: 7 } },
   ];
 
   const byId = {};
