@@ -632,6 +632,11 @@
       this.time.delayedCall = (d, cb, a, s) => { kick(d); return dCall(d, cb, a, s); };
       this.time.addEvent = (c) => { kick((c.delay || 0) * ((c.repeat || 0) + 1)); return eAdd(c); };
       this.game.canvas.addEventListener('pointerdown', () => kick(), true);
+      // The board only redraws while awake. When the browser drops the GPU context of a background tab,
+      // Phaser rebuilds it on return but a sleeping loop never draws again -> blank board. Wake it then,
+      // and whenever the tab comes back into view.
+      this.game.canvas.addEventListener('webglcontextrestored', () => setTimeout(() => kick(600), 0));
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) kick(600); });
       this.input.on('pointerdown', (p) => this._onTap(p));
       this.input.on('pointermove', (p) => hoverCell(this.cellAt(p)));
       this.input.on('gameout', () => hoverCell(null));
