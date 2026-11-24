@@ -498,18 +498,22 @@
     if (scene) scene.applyFx();
   }
   function hoverCell(i) {
+    if (pz && !solved && armed === 'reveal' && hovLine != null) return; // a number badge owns the highlight
     if (!pz || solved || i == null || i < 0 || !armed) return setHover(null);
     if (armed === 'check') return setHover(pz.givens[i] >= 0 ? null : [i]); // frozen tiles can't be checked
     // Reveal: only the line numbers highlight (hoverLine); hovering the board itself shows nothing.
+    // (The board's pointer-out fires *after* a number badge's pointer-over, hence the check above.)
     setHover(null);
   }
+  let hovLine = null;
   function hoverLine(L) {
-    if (!pz || armed !== 'reveal' || L == null) return setHover(null);
-    setHover(OP.Puzzle.ctxOf(pz).lc[L].slice());
+    hovLine = (pz && armed === 'reveal' && L != null) ? L : null;
+    if (hovLine == null) return setHover(null);
+    setHover(OP.Puzzle.ctxOf(pz).lc[hovLine].slice());
   }
   // Line-number badges show only while Reveal is armed, placed around the board in HUD px.
   function syncNums() {
-    if (!pz || !curL || armed !== 'reveal') { OP.ui.setLineNums(null); return; }
+    if (!pz || !curL || armed !== 'reveal') { hovLine = null; OP.ui.setLineNums(null); return; }
     const g = curL.g || 1;
     OP.ui.setLineNums({ n: pz.n, x: curL.x / g, y: curL.y / g, size: curL.size / g });
   }

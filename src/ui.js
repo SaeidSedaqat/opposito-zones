@@ -31,6 +31,8 @@
     // Flat white icons for the Pause and Settings menu buttons (colour comes from the button).
     mPlay: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7.5 5.2v13.6a1.2 1.2 0 0 0 1.8 1l10.6-6.8a1.2 1.2 0 0 0 0-2L9.3 4.2a1.2 1.2 0 0 0-1.8 1z"/></svg>',
     mRestart: '<svg viewBox="0 0 24 24"><path d="M19 12.5A7 7 0 1 1 16.6 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><path fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" d="M20.2 3.6v6.2H14z"/></svg>',
+    mShop: '<svg viewBox="0 0 24 24"><g fill="currentColor"><path d="M4.75 3H7.7L6.75 9.2a1.95 1.95 0 0 1-3.9 0z"/><path d="M8.6 3h2.95v6.2a1.95 1.95 0 0 1-3.9 0z"/><path d="M12.45 3h2.95l.95 6.2a1.95 1.95 0 0 1-3.9 0z"/><path d="M16.3 3h2.95l1.9 6.2a1.95 1.95 0 0 1-3.9 0z"/><path fill-rule="evenodd" d="M4.2 12.9h15.6v7.6a1.3 1.3 0 0 1-1.3 1.3H11v-7.2H6.4v7.2h-.9a1.3 1.3 0 0 1-1.3-1.3zM13.2 14.6h4.6v3.9h-4.6z"/></g></svg>',
+    mGear: '<svg viewBox="0 0 24 24"><path fill="currentColor" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill-rule="evenodd" d="M9.8 5.04L10.15 2.48L13.85 2.48L14.2 5.04A7.3 7.3 0 0 1 15.37 5.52L17.42 3.96L20.04 6.58L18.48 8.63A7.3 7.3 0 0 1 18.96 9.8L21.52 10.15L21.52 13.85L18.96 14.2A7.3 7.3 0 0 1 18.48 15.37L20.04 17.42L17.42 20.04L15.37 18.48A7.3 7.3 0 0 1 14.2 18.96L13.85 21.52L10.15 21.52L9.8 18.96A7.3 7.3 0 0 1 8.63 18.48L6.58 20.04L3.96 17.42L5.52 15.37A7.3 7.3 0 0 1 5.04 14.2L2.48 13.85L2.48 10.15L5.04 9.8A7.3 7.3 0 0 1 5.52 8.63L3.96 6.58L6.58 3.96L8.63 5.52A7.3 7.3 0 0 1 9.8 5.04ZM12 7.9a4.1 4.1 0 1 0 0 8.2a4.1 4.1 0 1 0 0-8.2Z"/></svg>', // 8 identical teeth, computed around the centre so every side matches
     mBag: '<svg viewBox="0 0 24 24"><path d="M8.7 9.5V7a3.3 3.3 0 0 1 6.6 0v2.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path fill="currentColor" d="M5.2 8.5h13.6a1 1 0 0 1 1 1.1l-1 10.5a1.6 1.6 0 0 1-1.6 1.4H6.8a1.6 1.6 0 0 1-1.6-1.4l-1-10.5a1 1 0 0 1 1-1.1z"/></svg>',
     mSound: '<svg viewBox="0 0 24 24"><path fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" d="M3.5 9.2h3.6l5-4.2v14l-5-4.2H3.5z"/><path d="M15.6 9.2a4 4 0 0 1 0 5.6M18.4 6.4a8 8 0 0 1 0 11.2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
     mMusic: '<svg viewBox="0 0 24 24"><path d="M9.2 17.5V6.2l10.6-2.4v11.4" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="6.4" cy="17.6" r="3.2" fill="currentColor"/><circle cx="17" cy="15.4" r="3.2" fill="currentColor"/></svg>',
@@ -38,7 +40,7 @@
     mHome: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.7 3.1a1 1 0 0 0-1.4 0l-8.6 8a1 1 0 0 0 .7 1.7H5v7.4a1.3 1.3 0 0 0 1.3 1.3h3.6v-5.4a1 1 0 0 1 1-1h2.2a1 1 0 0 1 1 1v5.4h3.6a1.3 1.3 0 0 0 1.3-1.3v-7.4h1.6a1 1 0 0 0 .7-1.7z"/></svg>',
   };
   // Button icons: generated WebP art (assets/art/ui); the SVGs above are only a fallback for keys without art.
-  const ART = ['gear', 'gear-white', 'bag', 'cart-white', 'back', 'pause', 'undo', 'hint', 'check', 'reveal', 'home', 'play', 'lock', 'ad', 'tick', 'cross', 'help', 'coin', 'play-white', 'ad-white'];
+  const ART = ['gear', 'bag', 'back', 'pause', 'undo', 'hint', 'check', 'reveal', 'home', 'play', 'lock', 'ad', 'tick', 'cross', 'help', 'coin', 'play-white', 'ad-white'];
   const ic = (k) => '<i class="ico">' + (ART.indexOf(k) >= 0 ? '<img alt="" draggable="false" src="assets/art/ui/' + k + '.webp?v=' + OP.config.VERSION + '">' : ICON[k]) + '</i>';
   // Check / Reveal icons: their art over a little 3x3 grid that shows what they act on --
   // Check lights up one cell, Reveal a whole row.
@@ -134,8 +136,8 @@
     '<button class="btn big primary play" id="hDaily">' + ic('play-white') + '<span class="t">Daily Play</span><span class="s" id="hDailyS"></span></button>' +
     '</div></div>' +
     '<div class="footrow">' +
-    '<button class="btn foot" id="hSet" aria-label="Settings">' + ic('gear-white') + '</button>' +
-    '<button class="btn foot" id="hShop" aria-label="Shop">' + ic('cart-white') + '</button>' +
+    '<button class="btn foot" id="hSet" aria-label="Settings">' + ic('mGear') + '</button>' +
+    '<button class="btn foot" id="hShop" aria-label="Shop">' + ic('mShop') + '</button>' +
     '</div></div>');
 
   function logoHtml() {
@@ -218,7 +220,7 @@
   const shop = screen('shop',
     '<div class="topbar tall"><button class="circ" id="sBack" aria-label="Back">' + ic('back') + '</button>' +
     '<h1 class="title">Shop</h1><span class="coins" id="sCoins"></span></div>' +
-    '<div class="shopbody"><div class="bshop" id="sBoost"></div><div class="cardwrap"><div class="cards" id="sCards"></div></div></div>');
+    '<div class="shopbody"><div class="cardwrap"><div class="cards" id="sCards"></div></div></div>');
 
   // Shop preview: the skin's two pieces side by side, big enough to see clearly.
   function miniBoard(sk) {
@@ -238,13 +240,6 @@
   renderers.shop = function () {
     applySkinBg();
     shop.querySelector('#sCoins').innerHTML = ic('coin') + '<b>' + S().coins + '</b>';
-    // Boosters for coins: the same packs a rewarded ad gives (3 hints, 2 checks, 1 reveal).
-    shop.querySelector('#sBoost').innerHTML = ['hint', 'check', 'reveal'].map((k) => {
-      const amt = C.adGives[k];
-      return '<button class="bitem' + (S().coins < C.boosterPrice[k] ? ' poor' : '') + '" data-k="' + k + '">' +
-        (k === 'hint' ? ic('hint') : gridIc(k)) + '<em>' + (S().boosters[k] || 0) + '</em>' +
-        '<span class="bn">+' + amt + ' ' + boosterName(k, amt) + '</span><span class="st">' + ic('coin') + C.boosterPrice[k] + '</span></button>';
-    }).join('');
     shop.querySelector('#sCards').innerHTML = OP.skins.list.map((sk) => {
       const st = skinState(sk);
       return '<button class="card ' + st.k + '" data-id="' + sk.id + '">' + miniBoard(sk) +
@@ -255,7 +250,6 @@
   let shopBack = null;
   function openShop(back) { shopBack = back || null; show('shop'); }
   shop.querySelector('#sBack').onclick = () => { const b = shopBack; shopBack = null; if (b) b(); else show('home'); };
-  shop.querySelector('#sBoost').onclick = (e) => { const b = e.target.closest('.bitem'); if (b && buyBooster(b.dataset.k)) renderers.shop(); };
   shop.querySelector('#sCards').onclick = (e) => { const b = e.target.closest('.card'); if (b) cardTap(OP.skins.get(b.dataset.id)); };
   function cardTap(sk) {
     const st = skinState(sk);
@@ -484,7 +478,7 @@
   function openPause(handlers) {
     const m = modal('<div class="panel menu"><h2>Pause</h2><div class="icgrid">' +
       '<button class="btn primary icb wide" data-x="close" aria-label="Resume">' + ic('mPlay') + '</button>' +
-      icb('pRestart', 'mRestart', 'Restart') + icb('pShop', 'mBag', 'Shop') +
+      icb('pRestart', 'mRestart', 'Restart') + icb('pShop', 'mShop', 'Shop') +
       setBtn('sound') + setBtn('music') +
       icb('pHelp', 'mHelp', 'How to play') + icb('pHome', 'mHome', 'Home') +
       '</div></div>', { onClose: handlers.onClose });
